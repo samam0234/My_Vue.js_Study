@@ -17,6 +17,17 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
     },
+    {
+      path: '/products',
+      name: 'product-list',
+      component: () => import('../views/ProductListView.vue'),
+    },
+    {
+      // :id 는 동적 파라미터. '/products/1', '/products/2' 등에 매칭됨
+      path: '/products/:id',
+      name: 'product-detail',
+      component: () => import('../views/ProductDetailView.vue'),
+    },
   ],
 })
 
