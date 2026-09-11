@@ -7,6 +7,7 @@ import LifecyclePractice from '../components/LifecyclePractice.vue'
 import PropsEmitPractice from '../components/PropsEmitPractice.vue'
 import FormValidationPractice from '../components/FormValidationPractice.vue'
 import FetchApiPractice from '../components/FetchApiPractice.vue'
+import LoginFormPractice from '../components/LoginFormPractice.vue'
 import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
@@ -29,6 +30,9 @@ import TheWelcome from '../components/TheWelcome.vue'
 
     <!-- study6: fetch API 호출 -->
     <FetchApiPractice />
+
+    <!-- study7: Pinia로 로그인 상태 공유 -->
+    <LoginFormPractice />
 
     <TheWelcome />
   </main>
