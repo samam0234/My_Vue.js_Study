@@ -6,6 +6,7 @@ import WatchPractice from '../components/WatchPractice.vue'
 import LifecyclePractice from '../components/LifecyclePractice.vue'
 import PropsEmitPractice from '../components/PropsEmitPractice.vue'
 import FormValidationPractice from '../components/FormValidationPractice.vue'
+import FetchApiPractice from '../components/FetchApiPractice.vue'
 import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
@@ -25,6 +26,9 @@ import TheWelcome from '../components/TheWelcome.vue'
 
     <!-- study5: 폼 검증 (study4는 별도 라우트: /products) -->
     <FormValidationPractice />
+
+    <!-- study6: fetch API 호출 -->
+    <FetchApiPractice />
 
     <TheWelcome />
   </main>
