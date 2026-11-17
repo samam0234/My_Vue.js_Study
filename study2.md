@@ -1,391 +1,225 @@
-# study2 — 반응형 상태: `ref`, `reactive`, `computed`, `watch`
+# study2 — 핵심 구조: 컴포넌트
 
-study1에서 템플릿 문법으로 화면을 그리는 방법을 배웠습니다.
-이제 **데이터가 바뀌면 화면이 자동으로 갱신된다**는 Vue의 핵심 개념인 **반응형(Reactivity)**을 깊게 파고듭니다.
+> 🎯 **목표**: Vue의 기본 단위인 **컴포넌트**를 직접 만들고, `props`(부모→자식)와 `emit`(자식→부모)으로 데이터를 주고받는다.
 
-study0 3장에서 개념만 짚고 넘어간 `ref`, `reactive`, `computed`, `watch`를 직접 손으로 만지며 차이를 느낀 뒤, 언제 뭘 쓸지 판단하는 기준을 익힙니다.
-
-```
-- [ ] Vue 3 + Vite 프로젝트 생성                  (study1 완료)
-- [ ] 템플릿 문법, v-bind / v-on / v-for / v-if  (study1 완료)
-- [x] ref, reactive, computed, watch             (study2 — 이번 문서)
-- [ ] 컴포넌트 props / emit
-- [ ] Vue Router (목록 → 상세)
-- [ ] 폼 검증 + fetch로 API 호출
-- [ ] Pinia로 로그인 상태 공유 (선택)
-```
-
-대응하는 실습 프로젝트: [`demo/`](./demo)
+- 이전: [study1](./study1.md) 기본 문법
+- 대응 코드: [`demo/src/components/ProductCard.vue`](./demo/src/components/ProductCard.vue), [`PropsEmitPractice.vue`](./demo/src/components/PropsEmitPractice.vue), [`project/src/components/PostCard.vue`](./project/src/components/PostCard.vue)
 
 ---
 
-## 1. 핵심 개념 재확인: 반응형(Reactivity)이란
+## 📖 이론
 
-> 데이터가 바뀌면, 그 데이터를 사용하는 화면이 **자동으로** 다시 그려진다.
+### 2.1 컴포넌트란
 
-바닐라 JS 코드라면:
-```js
-let count = 0
-const btn = document.querySelector('button')
-btn.addEventListener('click', () => {
-  count++
-  document.querySelector('p').textContent = count  // 직접 DOM 갱신해야 함
-})
+화면을 **재사용 가능한 조각**으로 나눈 것입니다. Vue에서는 `*.vue` 파일(SFC) 하나가 컴포넌트 하나입니다. 쪼개는 이유는 세 가지입니다.
+
+- **재사용**: 같은 카드를 여러 곳에서 쓴다.
+- **읽기 쉬움**: 한 파일이 한 가지 일만 한다.
+- **독립성**: 카드 안쪽 스타일·로직을 바꿔도 다른 곳에 영향이 없다 (`<style scoped>`).
+
+### 2.2 단방향 데이터 흐름
+
+```
+부모 ──props(데이터)──▶ 자식
+부모 ◀──emit(이벤트)─── 자식
 ```
 
-Vue에서는:
-```js
-const count = ref(0)
-// 템플릿에서 {{ count }}를 쓰면, count.value가 바뀔 때마다 자동으로 화면이 갱신됨
-```
+- 자식은 받은 `props`를 **직접 수정하지 않는다.** (수정하면 `[Vue warn]` 경고)
+- 바꾸고 싶으면 `emit`으로 "이런 일이 있었다"고 알리고, **실제 변경은 데이터를 가진 부모**가 한다.
+- 이 규칙 덕분에 "데이터가 어디서 바뀌었는지" 추적이 쉽다.
 
-Vue가 이 마법을 가능하게 하기 위해 `ref`, `reactive` 같은 API를 제공합니다.
+### 2.3 컴포넌트 계약 선언
+
+| 매크로 | 역할 |
+|---|---|
+| `defineProps({...})` | 받을 props의 이름·타입·필수 여부·기본값 선언 |
+| `defineEmits([...])` | 내보낼 이벤트 이름 선언 |
+| `defineModel()` | 부모와 `v-model`로 양방향 연결되는 prop+emit 한 쌍 (Vue 3.4+) |
+
+이름 규칙: 컴포넌트 파일은 `PascalCase`(`ProductCard.vue`), 이벤트는 `kebab-case`(`toggle-favorite`), 템플릿에서 props는 `:is-selected`처럼 kebab-case로 써도 `isSelected`와 매칭됩니다.
 
 ---
 
-## 2. `ref` — 단일 값을 감싸서 반응형으로 만들기
+## 🛠️ 실기
 
-### 2.1 기초 사용법
-
-```js
-import { ref } from 'vue'
-
-const count = ref(0)
-const message = ref('안녕하세요')
-const user = ref({ name: '홍길동', age: 20 })
-```
-
-### 2.2 `.value`로 JS 코드에서 접근/수정
-
-**스크립트 안에서는 `.value` 필수:**
-
-```js
-console.log(count.value)    // 0
-count.value++               // 1로 변경
-count.value = 10            // 10으로 변경
-```
-
-**왜 `.value`가 필요한가?**
-
-JavaScript의 원시값(number, string 등)은 참조로 추적할 방법이 없습니다. Vue는 `{ value: 0 }` 같은 객체로 감싸고, getter/setter를 통해 변화를 감지합니다.
-
-### 2.3 템플릿 안에서는 `.value` 불필요 (자동 언랩)
-
-**템플릿에서는 `.value` 생략:**
+### 실습 1. 자식 컴포넌트 `ProductCard.vue`
 
 ```vue
+<script setup>
+defineProps({
+  product: { type: Object, required: true },
+  isSelected: { type: Boolean, default: false },
+})
+
+const emit = defineEmits(['select', 'toggle-favorite'])
+
+function handleClick() {
+  emit('select')
+}
+
+function handleFavoriteClick(event) {
+  event.stopPropagation() // 카드 클릭(select)과 분리
+  emit('toggle-favorite')
+}
+</script>
+
 <template>
-  <p>{{ count }}</p>     <!-- count.value를 자동으로 풀어서 보여줌 -->
-  <button @click="count++">+1</button>  <!-- count.value++ 로 자동 해석 -->
+  <article class="card" :class="{ selected: isSelected }" @click="handleClick">
+    <button class="favorite-btn" @click="handleFavoriteClick">
+      {{ product.favorite ? '★' : '☆' }}
+    </button>
+    <h4>{{ product.name }}</h4>
+    <p>{{ product.price.toLocaleString() }}원</p>
+  </article>
 </template>
 ```
 
-### 2.4 배열도 ref로 감쌀 수 있음
+| 줄 | 설명 |
+|---|---|
+| `defineProps({ product: { type: Object, required: true } })` | 부모가 반드시 `product` 객체를 내려줘야 함. 안 주면 개발 모드에서 경고 |
+| `isSelected: { type: Boolean, default: false }` | 선택 여부. 안 주면 `false` |
+| `defineEmits(['select', 'toggle-favorite'])` | 이 컴포넌트가 내보낼 수 있는 이벤트 목록 |
+| `emit('select')` | 부모에게 "카드가 클릭됐다"고 알림. 데이터는 바꾸지 않는다 |
+| `event.stopPropagation()` | 별표 클릭이 바깥 카드의 `@click`까지 올라가 `select`가 같이 발생하는 것을 막음 |
+| `product.price.toLocaleString()` | 45000 → `45,000` 형식으로 표시 |
 
-```js
-const fruits = ref(['사과', '바나나'])
-fruits.value.push('포도')   // 배열 메서드 사용 가능
-```
+### 실습 2. 부모 컴포넌트 `PropsEmitPractice.vue`
 
----
-
-## 3. `reactive` — 객체 전체를 반응형으로 만들기
-
-### 3.1 기초 사용법
-
-```js
-import { reactive } from 'vue'
-
-const user = reactive({ name: '홍길동', age: 20 })
-const settings = reactive({ darkMode: false, fontSize: 14 })
-```
-
-### 3.2 `.value` 없이 직접 접근/수정
-
-```js
-console.log(user.name)     // '홍길동' (.value 없음!)
-user.age++                 // 21로 변경
-```
-
-### 3.3 `ref` vs `reactive` 차이점
-
-| 항목 | `ref` | `reactive` |
-|---|---|---|
-| 원시값(숫자, 문자열) | ✅ 가능 | ❌ 불가 (객체 전용) |
-| 객체/배열 | ✅ 가능 | ✅ 가능 |
-| 스크립트에서 접근 | `.value` 필수 | `.value` 불필요 |
-| 템플릿에서 접근 | `.value` 불필요 (자동 언랩) | 바로 접근 |
-| 구조분해 후 반응성 | ❌ 끊김 | ❌ 끊김 (toRefs로 해결) |
-
-### 3.4 구조분해(destructuring) 문제
-
-**reactive는 구조분해하면 반응성이 끊깁니다:**
-
-```js
-const user = reactive({ name: '홍길동', age: 20 })
-const { name, age } = user    // ⚠️ 반응성 끊김!
-
-name = '김철수'  // 화면에 갱신 안 됨
-```
-
-**ref는 구조분해해도 반응성이 유지됩니다 (`.value`를 통해):**
-
-```js
-const count = ref(0)
-const { value: count2 } = count   // ref 객체의 value 프로퍼티를 가져옴
-count.value++                      // count2도 함께 갱신됨
-```
-
-이 문제 때문에 **실무에서는 `ref`를 기본으로 쓰는 경향**이 있습니다.
-
----
-
-## 4. `computed` — 다른 반응형 데이터로부터 파생값 만들기
-
-### 4.1 기초 사용법
-
-의존하는 데이터가 바뀔 때만 재계산되고, 안 바뀌면 이전 결과를 재사용(캐싱)합니다.
-
-```js
+```vue
+<script setup>
 import { ref, computed } from 'vue'
+import ProductCard from './ProductCard.vue'
 
-const price = ref(1000)
-const quantity = ref(3)
+const products = ref([
+  { id: 1, name: '무선 키보드', price: 45000, favorite: false },
+  { id: 2, name: '모니터 암', price: 32000, favorite: true },
+  { id: 3, name: '노트북 거치대', price: 18000, favorite: false },
+])
+const selectedId = ref(null)
 
-const total = computed(() => {
-  console.log('계산 중!')
-  return price.value * quantity.value
-})
+const favoriteCount = computed(() => products.value.filter((p) => p.favorite).length)
 
-console.log(total.value)     // '계산 중!' 출력, 3000 반환
-console.log(total.value)     // '계산 중!' 출력 안 함 (캐시된 값 반환)
-price.value = 2000
-console.log(total.value)     // '계산 중!' 출력, 6000 반환
-```
-
-### 4.2 함수와의 차이
-
-**함수 방식 (매번 재계산):**
-
-```js
-function getTotal() {
-  return price.value * quantity.value
+function toggleFavorite(id) {
+  const product = products.value.find((p) => p.id === id)
+  if (product) product.favorite = !product.favorite
 }
-console.log(getTotal())   // 호출할 때마다 계산
+</script>
+
+<template>
+  <p>즐겨찾기: {{ favoriteCount }}개</p>
+  <ProductCard
+    v-for="product in products"
+    :key="product.id"
+    :product="product"
+    :is-selected="product.id === selectedId"
+    @select="selectedId = product.id"
+    @toggle-favorite="toggleFavorite(product.id)"
+  />
+</template>
 ```
 
-**computed 방식 (의존성이 바뀔 때만 재계산):**
+| 줄 | 설명 |
+|---|---|
+| `import ProductCard from './ProductCard.vue'` | `<script setup>`에서는 import만 하면 템플릿에서 바로 컴포넌트로 사용 가능 |
+| `ref([...])` | **데이터의 원본은 부모**가 가진다 |
+| `:product="product"` | `v-bind` — 자식에게 props 전달 |
+| `@toggle-favorite="toggleFavorite(product.id)"` | 자식이 `emit('toggle-favorite')`하면 부모의 함수 실행. 실제 데이터 변경은 여기서 |
+| `computed(...)` | 즐겨찾기 개수는 `products`로부터 파생된 값 (study3) |
 
-```js
-const total = computed(() => price.value * quantity.value)
-console.log(total.value)  // 의존성이 바뀔 때만 재계산
-```
+### 실습 3. 직접 만들어 보기 — `StatusBadge.vue` (슬롯 포함)
 
-데이터 변경이 빈번하지 않으면 큰 차이 없지만, 렌더링이 자주 일어나는 화면에서는 computed가 훨씬 효율적입니다.
+요구사항: 재고 상태를 알려주는 배지 컴포넌트. `type`(`success`/`warn`/`danger`)에 따라 색이 바뀌고, 안의 글자는 **슬롯**으로 받는다.
 
-### 4.3 쓰기 가능한 computed (심화)
-
-기본은 읽기 전용이지만, getter/setter를 모두 정의할 수 있습니다.
-
-```js
-const fullName = computed({
-  get() {
-    return `${firstName.value} ${lastName.value}`
+```vue
+<!-- src/components/StatusBadge.vue -->
+<script setup>
+defineProps({
+  type: {
+    type: String,
+    default: 'success',
+    validator: (v) => ['success', 'warn', 'danger'].includes(v),
   },
-  set(newValue) {
-    [firstName.value, lastName.value] = newValue.split(' ')
-  }
 })
+</script>
 
-console.log(fullName.value)      // '홍 길동'
-fullName.value = '김 철수'       // setter 실행, firstName과 lastName 각각 갱신
+<template>
+  <span class="badge" :class="type"><slot>상태 없음</slot></span>
+</template>
+
+<style scoped>
+.badge { padding: 2px 8px; border-radius: 999px; font-size: 0.8rem; }
+.success { background: #dcfce7; color: #166534; }
+.warn { background: #fef9c3; color: #854d0e; }
+.danger { background: #fee2e2; color: #991b1b; }
+</style>
 ```
 
----
+사용:
 
-## 5. `watch` — 반응형 데이터 변화를 감시해서 부수효과 실행
-
-### 5.1 기초 사용법
-
-```js
-import { ref, watch } from 'vue'
-
-const keyword = ref('')
-
-watch(keyword, (newValue, oldValue) => {
-  console.log(`검색어: ${oldValue} → ${newValue}`)
-  // 여기서 API 호출, localStorage 저장 등 "부수효과" 실행
-})
+```vue
+<StatusBadge type="danger">품절</StatusBadge>
+<StatusBadge>재고 있음</StatusBadge>
+<StatusBadge />   <!-- 슬롯 기본값 "상태 없음" -->
 ```
 
-데이터가 바뀔 때마다 콜백 함수가 실행됩니다.
+- `<slot>`: 부모가 태그 사이에 넣은 내용이 들어가는 자리. 안의 글자는 기본값.
+- `validator`: 허용되지 않은 값을 넣으면 개발 모드에서 경고.
 
-### 5.2 여러 소스 감시하기
+### 실습 4. 종합 프로젝트에서의 쓰임 — `project/` PostCard
 
-```js
-const firstName = ref('홍')
-const lastName = ref('길동')
+`PostCard.vue`는 카드 전체가 `<RouterLink>`라서 클릭하면 상세로 이동합니다. 안의 즐겨찾기 버튼만 이동을 막고 `emit`으로 부모에게 알립니다.
 
-// 배열로 여러 ref를 감시
-watch([firstName, lastName], (newValues, oldValues) => {
-  const [newFirst, newLast] = newValues
-  const [oldFirst, oldLast] = oldValues
-  console.log(`${oldFirst} ${oldLast} → ${newFirst} ${newLast}`)
-})
+```vue
+<script setup>
+defineProps({ post: Object, isFavorite: Boolean })
+const emit = defineEmits(['toggle-favorite'])
+
+function handleFavoriteClick(event) {
+  event.preventDefault()    // RouterLink의 페이지 이동 취소
+  event.stopPropagation()
+  emit('toggle-favorite')
+}
+</script>
 ```
 
-### 5.3 즉시 실행 (immediate 옵션)
+로그인 확인 같은 **규칙은 부모(`PostListView`)가 담당**합니다. 자식은 "눌렸다"만 말합니다.
 
-기본적으로 `watch`는 처음 설정할 때는 실행되지 않고, 이후 변경될 때만 실행됩니다.
-`immediate: true` 옵션을 주면 설정 직후 한 번 즉시 실행됩니다.
-
-```js
-watch(
-  keyword,
-  (newValue) => {
-    console.log('검색:', newValue)
-  },
-  { immediate: true }  // 설정 직후 한 번 즉시 실행
-)
-```
-
-### 5.4 깊은 감시 (deep 옵션)
-
-객체나 배열의 **중첩된 프로퍼티** 변경도 감시하려면 `deep: true`를 줍니다.
-
-```js
-const user = reactive({ name: '홍길동', age: 20 })
-
-watch(
-  user,
-  (newUser) => {
-    console.log('user 변경:', newUser)
-  },
-  { deep: true }  // 중첩된 프로퍼티 변경도 감시
-)
-
-user.age = 21   // 감시됨
-```
-
-**주의:** 깊은 감시는 성능 비용이 크므로, 가능하면 감시할 프로퍼티를 구체적으로 지정하세요.
-
-```js
-// 더 효율적: age만 감시
-watch(() => user.age, (newAge) => { ... })
-```
-
-### 5.5 `watchEffect` — 자동 의존성 추적
-
-콜백 함수 안에서 사용하는 반응형 변수들을 자동으로 감시합니다.
-
-```js
-import { ref, watchEffect } from 'vue'
-
-const count = ref(0)
-const multiplier = ref(2)
-
-watchEffect(() => {
-  // count와 multiplier를 사용하므로 둘 다 자동으로 감시
-  console.log(`${count.value} × ${multiplier.value} = ${count.value * multiplier.value}`)
-})
-
-count.value++           // 감시됨
-multiplier.value = 3    // 감시됨
-```
-
-`watch`보다 간단하지만, 의존성을 명시하지 않아서 혹시 모르는 것들까지 감시할 수 있다는 단점이 있습니다.
-
----
-
-## 6. 라이프사이클 훅 — 컴포넌트 특정 시점에 코드 실행하기
-
-### 6.1 주요 라이프사이클
-
-```
-생성(setup) → 마운트(onMounted) → 갱신(onUpdated) → 언마운트(onUnmounted)
-```
-
-### 6.2 `onMounted` — 컴포넌트가 DOM에 붙은 직후
-
-가장 자주 쓰는 훅입니다. API 데이터 로드, 이벤트 리스너 등록 등을 여기서 합니다.
-
-```js
-import { onMounted } from 'vue'
-
-onMounted(() => {
-  console.log('컴포넌트가 DOM에 붙었습니다')
-  // API 호출
-  fetch('/api/data').then(res => res.json()).then(data => {
-    // 데이터 처리
-  })
-})
-```
-
-### 6.3 기타 훅
-
-```js
-import { onMounted, onUpdated, onUnmounted } from 'vue'
-
-onMounted(() => {
-  console.log('마운트됨')
-})
-
-onUpdated(() => {
-  console.log('데이터 갱신됨')
-})
-
-onUnmounted(() => {
-  console.log('언마운트됨 (정리 작업: 이벤트 리스너 제거 등)')
-})
-```
-
----
-
-## 7. 실습 컴포넌트들
-
-study1의 `TemplateSyntaxPractice.vue`에서 `ref`를 이미 쓰고 있었으니, 이제 다음 컴포넌트들을 추가합니다:
-
-### 7.1 `RefReactivePractice.vue` — ref vs reactive 직접 비교
-
-### 7.2 `ComputedPractice.vue` — computed의 캐싱 확인
-
-### 7.3 `WatchPractice.vue` — watch와 watchEffect 실습
-
-### 7.4 `LifecyclePractice.vue` — onMounted로 데이터 초기화
-
----
-
-## 8. 실행 확인
+### 실행 확인
 
 ```bash
-cd demo
-npm run dev
+cd demo && npm run dev
 ```
 
-홈 페이지에서 다음 섹션들이 모두 나타나는지 확인:
-- 템플릿 문법 실습 (study1)
-- ref vs reactive 비교 (study2)
-- computed 캐싱 (study2)
-- watch 감시 (study2)
-- 라이프사이클 (study2)
+1. 카드의 별표 클릭 → 즐겨찾기 개수가 바뀌는가 (부모 데이터 변경 → 자식 재렌더)
+2. 카드 본문 클릭 → 선택 테두리와 "선택된 상품"이 바뀌는가
+3. 별표를 눌렀을 때 선택이 **같이 바뀌지 않는가** (`stopPropagation` 확인)
 
 ---
 
-## 9. 선택 가이드: 언제 뭘 쓸까?
+## ⚠️ 오류 노트
 
-| 상황 | 추천 | 이유 |
+| 증상 / 경고 | 원인 | 해결 |
 |---|---|---|
-| 숫자, 문자열, 불리언 하나 | `ref` | 구조분해 후에도 반응성 유지 |
-| 여러 필드의 객체를 하나의 단위로 다룸 | `ref` 또는 `reactive` | 둘 다 가능, 구조분해 계획 없으면 reactive 편함 |
-| 구조분해할 계획 있음 | `ref` | reactive는 구조분해하면 반응성 끊김 |
-| 다른 반응형 데이터로부터 파생값 만듦 | `computed` | 성능 최적화(캐싱) |
-| 데이터 변화에 따라 무언가 실행하고 싶음 | `watch` | 부수효과(API 호출, 저장 등) 실행 |
-| 명확한 콜백 로직 없이 자동 추적 | `watchEffect` | watch보다 간단 |
-| 컴포넌트 초기화 시점에 코드 실행 | `onMounted` | API 로드, 이벤트 리스너 등록 |
+| `[Vue warn]: Missing required prop: "product"` | 필수 prop을 안 내려줌 | 부모에서 `:product="..."` 전달 |
+| `[Vue warn]: Attempting to mutate prop "xxx"` | 자식이 props를 직접 변경 | `emit`으로 부모에게 요청하거나 `ref(props.xxx)`로 복사해서 사용 |
+| `[Vue warn]: Extraneous non-emits event listeners` | `defineEmits`에 없는 이벤트를 부모가 듣고 있음 | 이벤트 이름 선언/오타 확인 |
+| `[Vue warn]: Failed to resolve component: XXX` | import를 안 했거나 파일명/대소문자 불일치 | `import` 경로와 PascalCase 확인 |
+| props를 `ref`처럼 `.value`로 접근 | props는 `.value`가 필요 없음 (템플릿에서도, `props.xxx`도) | `props.product`로 접근 |
+| 객체/배열 prop 기본값에 `default: []` | 모든 인스턴스가 같은 배열을 공유 | `default: () => []` 처럼 함수로 |
+| 카드 안 버튼 클릭이 바깥 `@click`까지 실행 | 이벤트 버블링 | `@click.stop` 또는 `event.stopPropagation()` |
 
 ---
 
-## 다음 단계 (study3 예정)
+## ☐ 체크리스트
 
-- 컴포넌트 쪼개기: 자식 컴포넌트에 데이터 내려주고(`props`), 자식이 부모에게 알리기(`emit`)
-- 버튼 컴포넌트, 입력 컴포넌트 등 재사용 가능한 조각으로 분리
+- ☑ 컴포넌트를 파일로 분리하고 `import`해서 사용
+- ☑ `defineProps`로 타입·필수·기본값을 선언
+- ☑ `defineEmits` + `emit`으로 자식→부모 알림, 실제 변경은 부모가 수행
+- ☑ "자식은 props를 직접 바꾸지 않는다"를 설명할 수 있다
+- ☑ `project/`의 `PostCard`에서 `RouterLink` 안 버튼의 이동 방지를 이해
+- ☐ 실습 3: `StatusBadge.vue`(슬롯 + validator)를 직접 만들어 `demo/`에 붙이기
+- ☐ `defineModel()`로 `v-model`이 되는 `SearchInput.vue` 만들어 보기
+
+## ➡️ 다음 단계 연결
+
+컴포넌트의 **데이터(상태)** 를 어떻게 다루는지 [study3](./study3.md)에서 `ref` / `reactive` / `computed` / `watch`로 정리합니다.
