@@ -3,7 +3,8 @@
 > 🎯 **목표**: Pinia를 구조적으로 쓰고, 요청 캐시·중복 제거·취소·경쟁 상태 방지 같은 **비동기 데이터 흐름**을 직접 구현한다.
 
 - 이전: [midpoint](./midpoint.md) (한계: 캐시 없음, 경쟁 상태)
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다.
+- 구현 위치: [`project/src/api/cache.ts`](./project/src/api/cache.ts), [`composables/useLatestRequest.ts`](./project/src/composables/useLatestRequest.ts), [`components/CommentSection.vue`](./project/src/components/CommentSection.vue)(낙관적 업데이트), [`views/PostListView.vue`](./project/src/views/PostListView.vue)
+- 구현 메모: 캐시는 `signal` 을 함께 받아 **취소된 진행 중 요청을 다른 호출이 재사용하지 않게** 했습니다(같은 키로 이전 요청을 취소하고 곧바로 다시 부르면 취소된 Promise 를 받는 경합이 생김). 취소 판별은 `instanceof DOMException` 이 아니라 `err.name` 으로 합니다.
 
 ---
 
@@ -246,10 +247,10 @@ const { data, isPending, error } = useQuery({
 
 - ☐ 로컬 UI / 공유 / 서버 / URL 상태를 구분해 각각 둘 곳을 정했다
 - ☐ `storeToRefs`로 스토어를 반응성 유지하며 구조분해
-- ☐ `AbortController`로 이전 요청을 취소해 경쟁 상태를 막았다 (Network에서 `canceled` 확인)
-- ☐ TTL 캐시 + in-flight 공유를 구현하고 적중/만료를 확인
-- ☐ 변경 API 후 캐시 무효화
-- ☐ 낙관적 업데이트와 롤백을 구현(또는 설명)
+- ☑ `AbortController`로 이전 요청을 취소해 경쟁 상태를 막았다 (Network에서 `canceled` 확인) — `PostListView` + `useLatestRequest`
+- ☑ TTL 캐시 + in-flight 공유를 구현하고 적중/만료를 확인 — `api/cache.ts` (`cache.spec.ts` 로 적중·만료·in-flight 공유·취소 검증)
+- ☑ 변경 API 후 캐시 무효화 — `createPost`/`updatePost`/`deletePost`/댓글 API
+- ☑ 낙관적 업데이트와 롤백을 구현(또는 설명) — `CommentSection` 작성·삭제 (실패 시 롤백, 통합 테스트로 검증)
 - ☐ `Promise.all` vs `allSettled`의 차이를 설명
 - ☐ (선택) TanStack Query로 같은 목록을 구현해 직접 구현과 비교
 
