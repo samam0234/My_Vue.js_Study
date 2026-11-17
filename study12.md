@@ -4,7 +4,8 @@
 
 - 이전: [study11](./study11.md) 상태·데이터 흐름
 - 원칙: **측정 → 가설 → 변경 1개 → 재측정.** 측정 없이 하는 최적화는 복잡도만 늘린다.
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다.
+- 구현 위치: [`project/vite.config.ts`](./project/vite.config.ts)(`build:analyze`, 벤더 청크 분리), `useDebounce`, 라우트 지연 로딩
+- Lighthouse 는 아직 측정하지 않았습니다. 기록표의 빈 칸은 직접 측정해서 채웁니다.
 
 ---
 
@@ -94,23 +95,28 @@ export default defineConfig({
 
 ### 실습 3. 번들 분할 — 변하지 않는 라이브러리를 따로
 
-```js
-// vite.config.js
+Vite 8 은 번들러로 **rolldown** 을 쓰므로 Rollup 의 `manualChunks` 대신 `rolldownOptions.output.codeSplitting` 을 씁니다.
+
+```ts
+// vite.config.ts
 build: {
-  rollupOptions: {
+  rolldownOptions: {
     output: {
-      manualChunks(id) {
-        if (id.includes('node_modules')) {
-          if (id.includes('vue') || id.includes('pinia')) return 'vue-vendor'
-          return 'vendor'
-        }
+      codeSplitting: {
+        groups: [
+          {
+            name(id: string) {
+              return /node_modules[\\/](vue|@vue|vue-router|pinia)[\\/]/.test(id) ? 'vue-vendor' : null
+            },
+          },
+        ],
       },
     },
   },
 },
 ```
 
-효과: 앱 코드를 고쳐 재배포해도 `vue-vendor-*.js`는 해시가 같아 **브라우저 캐시를 재사용**합니다. (Vite 8의 번들러 설정 키가 버전에 따라 다를 수 있으니 `vite.dev`의 build 문서에서 현재 이름을 확인하세요. 안 맞으면 경고가 뜹니다.)
+효과(이 저장소 실측, gzip): 앱 코드 `index-*.js` **4.6KB** + `vue-vendor-*.js` **37.9KB**. 앱 코드만 고쳐 재배포해도 `vue-vendor-*.js` 는 해시가 같아 **브라우저 캐시를 재사용**합니다. 적용 후에는 반드시 `npm run build` 출력에서 청크가 실제로 나뉘었는지 확인하세요(설정이 무시되어도 오류가 나지 않습니다).
 
 ### 실습 4. 무거운 컴포넌트 지연 로딩
 
@@ -196,6 +202,8 @@ DevTools → Performance 탭에서 목록 필터링을 녹화 → 컴포넌트 �
 
 ## ⚠️ 오류 노트
 
+> 실제로 겪은 함정: 청크 분리 설정을 넣었는데 효과가 없다면, **같은 폴더에 낡은 `vite.config.js` 가 남아 있는지** 먼저 확인하세요. `.js` 와 `.ts` 가 함께 있으면 `.js` 가 우선해서 `.ts` 설정(플러그인·청크·프록시)이 통째로 무시됩니다 ([study14](./study14.md)).
+
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | 개발 서버에서 측정한 점수가 매우 낮음 | dev는 최적화 안 된 코드 | `build` + `preview`로 측정 |
@@ -212,7 +220,7 @@ DevTools → Performance 탭에서 목록 필터링을 녹화 → 컴포넌트 �
 ## ☐ 체크리스트
 
 - ☐ `build` + `preview` 환경에서 Lighthouse 기준선 측정(3회 중앙값)
-- ☐ `rollup-plugin-visualizer`로 가장 큰 모듈 확인
+- ☑ `rollup-plugin-visualizer`로 가장 큰 모듈 확인 — `npm run build:analyze` → `dist/stats.html`
 - ☐ 최소 3가지 최적화 적용 (예: 청크 분할, 디바운스, 이미지 lazy/크기 지정)
 - ☐ 각 변경마다 재측정하고 기록표를 채움
 - ☐ 라우트 지연 로딩과 `defineAsyncComponent`의 차이를 설명
