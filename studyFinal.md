@@ -1,5 +1,7 @@
 # studyFinal — 종합 실습: 미니 게시판 웹사이트
 
+> ℹ️ **기록용 문서입니다.** 아래는 JSONPlaceholder + 가상 로그인으로 만든 첫 버전(JS)의 설명입니다. 현재 `project/` 는 같은 사이트를 공통 API 스펙 v1 기반 TypeScript 로 재구성한 버전이라 파일 이름·코드가 다릅니다(`*.vue`/`*.js` → `*.ts`, 신규 `api/`·`mocks/`·`composables/` 등). 현재 구조는 [midpoint.md](./midpoint.md), [final.md](./final.md), [README.md](./README.md) 를 보세요. 이전 코드는 git 이력(`f0fdea4`)에 있습니다.
+
 study0부터 study7까지 하나씩 익혔던 개념들을 전부 합쳐서, `demo/`가 아닌 **새 프로젝트** [`project/`](./project)에 작지만 실제로 동작하는 웹사이트를 만들었습니다.
 
 ```
