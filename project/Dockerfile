@@ -1,7 +1,7 @@
 # study17: 멀티 스테이지 빌드 — node 에서 빌드하고, 결과(dist)만 nginx 이미지에 담는다.
 
 # ---------- 1단계: 빌드 ----------
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 
 # 의존성 설치를 먼저 해서, 소스만 바뀌면 이 레이어 캐시를 재사용한다.
