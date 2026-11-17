@@ -1,175 +1,215 @@
-# study5 — 폼 검증
+# study5 — 폼·입력·검증
 
-원래 체크리스트의 "폼 검증 + fetch로 API 호출" 항목을, 각각 깊이 있게 다루기 위해 두 문서로 나눴습니다. 이번 문서는 **폼 검증**만 다루고, 실제 서버 통신(fetch)은 study6에서 이어집니다.
+> 🎯 **목표**: `v-model`로 사용자 입력을 받고, 클라이언트 유효성 검사와 오류 표시를 만든 뒤, 서버가 돌려준 검증 오류도 같은 자리에 표시한다.
 
-```
-- [x] Vue 3 + Vite 프로젝트 생성
-- [x] 템플릿 문법, v-bind / v-on / v-for / v-if
-- [x] ref, reactive, computed, watch
-- [x] 컴포넌트 props / emit
-- [x] Vue Router (목록 → 상세)
-- [x] 폼 검증                                     (study5 — 이번 문서)
-- [ ] fetch로 API 호출                            (study6 예정)
-- [ ] Pinia로 로그인 상태 공유 (선택)              (study7 예정)
-```
-
-대응하는 실습 프로젝트: [`demo/`](./demo)
+- 이전: [study4](./study4.md) 라우팅
+- 대응 코드: [`demo/src/components/FormValidationPractice.vue`](./demo/src/components/FormValidationPractice.vue), [`LoginFormPractice.vue`](./demo/src/components/LoginFormPractice.vue), [`project/src/views/LoginView.vue`](./project/src/views/LoginView.vue)
 
 ---
 
-## 1. `v-model` 다시 보기
+## 📖 이론
 
-study0 2.7절에서 짧게 언급했던 `v-model`을 이번엔 제대로 씁니다.
+### 5.1 `v-model`과 수식어
 
-```html
-<input v-model="form.username" type="text" />
-```
+`v-model`은 입력 요소와 데이터를 양방향으로 묶습니다 (`:value` + `@input`의 줄임).
 
-`v-model`은 사실 아래 두 가지를 합쳐놓은 축약형입니다:
+| 수식어 | 효과 |
+|---|---|
+| `.trim` | 앞뒤 공백 제거 |
+| `.number` | 숫자로 변환 |
+| `.lazy` | `input`이 아니라 `change`(포커스를 잃을 때)에 동기화 |
 
-```html
-<!-- v-model과 동일한 의미 -->
-<input :value="form.username" @input="form.username = $event.target.value" />
-```
+| 입력 요소 | 연결되는 값 |
+|---|---|
+| `<input type="text">`, `<textarea>` | 문자열 |
+| `<input type="checkbox">` | 불리언 (여러 개면 배열) |
+| `<input type="radio">` | 선택된 value |
+| `<select>` | 선택된 option의 value |
 
-- `:value`(study0 2.3절 `v-bind`)로 현재 값을 화면에 보여주고
-- `@input`(study0 2.4절 `v-on`)으로 사용자가 입력할 때마다 데이터를 갱신
+### 5.2 검증의 두 층
 
-양방향 바인딩이라고 부르는 이유: 데이터가 바뀌면 화면이 바뀌고(`:value`), 화면(입력)이 바뀌면 데이터도 바뀝니다(`@input`).
+| 층 | 어디서 | 목적 |
+|---|---|---|
+| 클라이언트 검증 | 브라우저(Vue) | **빠른 피드백**, UX. 우회 가능하므로 보안 수단이 아님 |
+| 서버 검증 | 백엔드 | **진짜 보증.** 항상 필요 |
 
-### 1.1 v-model 수식어(modifier)
+프론트는 두 가지를 모두 화면에 보여줄 수 있어야 합니다.
 
-```html
-<input v-model.trim="form.username" />     <!-- 앞뒤 공백 자동 제거 -->
-<input v-model.number="age" type="number" /> <!-- 문자열 대신 숫자로 변환 -->
-<input v-model.lazy="keyword" />           <!-- input 대신 change 이벤트에 반응(포커스 아웃 시) -->
-```
+### 5.3 "언제" 오류를 보여줄 것인가
 
-이번 실습에서는 아이디/이메일에 `.trim`을 사용해 공백만 입력하고 제출하는 걸 방지했습니다.
+처음부터 빨간 오류가 가득하면 불친절합니다. 일반적인 패턴:
 
-## 2. 검증 로직을 `computed`로 선언하기
+1. 처음에는 조용히 둔다.
+2. 사용자가 **그 필드를 벗어났을 때(blur)** 그 필드의 오류를 보여준다 (`touched`).
+3. **제출을 시도하면** 모든 필드 오류를 보여준다 (`submitted`).
 
-study2에서 배운 `computed`를 폼 검증에 활용하는 게 이번 실습의 핵심입니다. "에러 객체"를 `computed`로 선언하면, 폼 데이터가 바뀔 때마다 **자동으로** 최신 에러 상태가 유지됩니다.
+---
 
-```js
-const form = reactive({
-  username: '',
-  email: '',
-  password: '',
-  passwordConfirm: '',
-})
+## 🛠️ 실기
+
+### 실습 1. 검증 로직을 `computed`로 선언 (`LoginView.vue`)
+
+```vue
+<script setup>
+import { reactive, computed, ref } from 'vue'
+
+const form = reactive({ email: '', password: '' })
+const touched = reactive({ email: false, password: false })
+const submitted = ref(false)
 
 const errors = computed(() => {
   const e = {}
-
-  if (!form.username.trim()) {
-    e.username = '아이디를 입력해주세요.'
-  } else if (form.username.trim().length < 3) {
-    e.username = '아이디는 3자 이상이어야 합니다.'
-  }
-
   if (!form.email.trim()) {
     e.email = '이메일을 입력해주세요.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     e.email = '올바른 이메일 형식이 아닙니다.'
   }
-
   if (!form.password) {
     e.password = '비밀번호를 입력해주세요.'
   } else if (form.password.length < 8) {
     e.password = '비밀번호는 8자 이상이어야 합니다.'
   }
-
-  if (!form.passwordConfirm) {
-    e.passwordConfirm = '비밀번호를 한 번 더 입력해주세요.'
-  } else if (form.password !== form.passwordConfirm) {
-    e.passwordConfirm = '비밀번호가 일치하지 않습니다.'
-  }
-
   return e
 })
 
 const isValid = computed(() => Object.keys(errors.value).length === 0)
-```
-
-`form`은 여러 필드를 가진 객체라서 study2 3장에서 다룬 기준대로 `reactive`를 썼습니다. (구조분해할 계획이 없으므로 `reactive`가 자연스러움)
-
-## 3. "언제" 에러를 보여줄 것인가 — UX 패턴
-
-검증 로직만큼 중요한 게 **"에러를 언제 화면에 보여주는가"**입니다. 무작정 항상 보여주면, 사용자가 아이디 칸을 클릭만 해도 "아이디를 입력해주세요"가 바로 뜨는 불편한 경험이 됩니다.
-
-이번 실습에서 쓴 패턴:
-
-```js
-const touched = reactive({
-  username: false,
-  email: false,
-  password: false,
-  passwordConfirm: false,
-})
-
-const submitted = ref(false)
 
 function markTouched(field) {
   touched[field] = true
 }
-
 function shouldShowError(field) {
   return (touched[field] || submitted.value) && errors.value[field]
 }
+</script>
 ```
 
-```html
-<input v-model.trim="form.username" @blur="markTouched('username')" />
-<p v-if="shouldShowError('username')" class="error">{{ errors.username }}</p>
+| 줄 | 설명 |
+|---|---|
+| `reactive({ email, password })` | 폼은 모양이 고정된 객체라 `reactive`가 어울린다 |
+| `touched` | 필드별로 "한 번 건드렸는지" 기록 |
+| `errors = computed(...)` | 입력이 바뀔 때마다 **자동 재검증**. 오류가 있는 필드만 키로 가진 객체 |
+| 정규식 `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | 간단한 이메일 형식 검사 (엄밀한 검증은 서버 몫) |
+| `isValid` | 오류 객체가 비었는지 → 제출 버튼 활성화 등에 사용 |
+| `shouldShowError` | blur 했거나 제출 시도했을 때만 오류 노출 |
+
+### 실습 2. 템플릿에서 오류 표시
+
+```vue
+<form @submit.prevent="handleSubmit" novalidate>
+  <div class="field">
+    <label for="login-email">이메일</label>
+    <input id="login-email" v-model.trim="form.email" type="text" @blur="markTouched('email')" />
+    <p v-if="shouldShowError('email')" class="error">{{ errors.email }}</p>
+  </div>
+
+  <div class="field">
+    <label for="login-password">비밀번호</label>
+    <input id="login-password" v-model="form.password" type="password" @blur="markTouched('password')" />
+    <p v-if="shouldShowError('password')" class="error">{{ errors.password }}</p>
+  </div>
+
+  <button type="submit" :disabled="authStore.loading">
+    {{ authStore.loading ? '로그인 중...' : '로그인' }}
+  </button>
+</form>
 ```
 
-- `@blur`(포커스가 그 입력칸을 벗어날 때 발생하는 이벤트): 사용자가 그 필드를 "한 번 만졌다"는 걸 기록
-- `touched[field]`가 true이거나, 폼을 이미 제출 시도했으면(`submitted`) 에러를 노출
-- 즉, **처음 진입해서 아무것도 안 건드렸을 땐 에러가 안 보이고**, 필드를 벗어나거나 제출을 시도한 뒤부터 에러가 보임
+| 코드 | 설명 |
+|---|---|
+| `@submit.prevent` | 폼의 기본 동작(페이지 새로고침 제출)을 막고 우리 함수 실행 |
+| `novalidate` | 브라우저 기본 검증 말풍선을 끄고 직접 만든 검증만 사용 |
+| `label for` ↔ `input id` | 라벨 클릭 시 입력창 포커스 + 스크린리더 접근성 |
+| `:disabled="authStore.loading"` | 요청 중 **중복 제출** 방지 |
 
-## 4. 제출 처리
+### 실습 3. 제출 처리
 
 ```js
-function handleSubmit() {
-  submitted.value = true // 제출 시도하면 모든 필드 에러를 한꺼번에 노출
+async function handleSubmit() {
+  submitted.value = true          // 모든 필드의 오류를 보이게
+  if (!isValid.value) return      // 오류가 있으면 요청하지 않음
 
-  if (!isValid.value) {
-    submitResult.value = ''
-    return
-  }
-
-  // 실제로는 여기서 fetch로 서버에 전송 (study6, study7에서 이어짐)
-  submitResult.value = `"${form.username}"님, 가입 정보가 유효합니다! (아직 서버 전송은 안 함)`
+  const success = await authStore.login({ email: form.email, password: form.password })
+  if (success) router.push('/')
 }
 ```
 
-```html
-<form @submit.prevent="handleSubmit" novalidate>
+### 실습 4. 서버가 돌려준 검증 오류를 같은 자리에 표시
+
+백엔드가 공통 API 스펙 v1의 오류 형식을 쓰면, 검증 실패 시 이렇게 옵니다.
+
+```json
+{ "error": { "code": "VALIDATION_ERROR", "message": "입력값을 확인하세요.",
+             "fields": { "email": ["이미 사용 중인 이메일입니다."] } } }
 ```
 
-- `@submit.prevent`: `v-on`의 이벤트 수식어. `.prevent`는 `event.preventDefault()`를 자동으로 호출 — 브라우저의 기본 폼 제출(페이지 새로고침)을 막고, 대신 Vue가 관리하는 `handleSubmit`만 실행되게 함.
-- `novalidate`: HTML 기본 검증 팝업(브라우저 내장 "이 필드를 작성하세요" 툴팁)을 끄고, 우리가 만든 검증 UI만 쓰도록 함.
-- 지금은 실제 서버로 데이터를 보내지 않고 성공 메시지만 표시합니다. **study6에서 fetch를 배운 뒤, study7에서 이 폼을 실제 로그인 폼으로 발전시켜 Pinia와 연결**할 예정입니다.
+```js
+const serverErrors = ref({})   // { email: ['...'], ... }
 
-## 5. 실행 확인
+async function handleSubmit() {
+  submitted.value = true
+  serverErrors.value = {}
+  if (!isValid.value) return
+
+  try {
+    await authStore.signup({ ...form })
+    router.push('/login')
+  } catch (err) {
+    // err.fields 는 study6의 API 클라이언트가 error.fields 를 담아 던진 값
+    if (err.code === 'VALIDATION_ERROR') serverErrors.value = err.fields ?? {}
+  }
+}
+
+// 클라이언트 오류가 없으면 서버 오류를 대신 보여준다
+function fieldError(field) {
+  return (shouldShowError(field) && errors.value[field]) || serverErrors.value[field]?.[0]
+}
+```
+
+```vue
+<p v-if="fieldError('email')" class="error">{{ fieldError('email') }}</p>
+```
+
+- 서버 오류는 **사용자가 그 필드를 고치는 순간** 지워 주는 것이 좋다: `watch(() => form.email, () => delete serverErrors.value.email)`
+
+### 실행 확인
 
 ```bash
-cd demo
-npm run dev
+cd project && npm run dev     # /login
 ```
 
-- 아이디 칸을 클릭했다가 빈 채로 벗어나기 → "아이디를 입력해주세요" 에러가 뜨는지 (`@blur` 확인)
-- 2자만 입력 → "3자 이상이어야 합니다" 에러 확인
-- 이메일에 `abc` 입력 → 형식 에러 확인, `abc@test.com` 입력 → 에러 사라지는지
-- 비밀번호와 비밀번호 확인을 다르게 입력 → 불일치 에러 확인
-- 모든 필드를 비운 채 "가입하기" 클릭 → 한 번에 모든 에러가 노출되는지 (`submitted` 확인)
-- 모든 값을 올바르게 입력 후 제출 → 성공 메시지가 뜨는지
-- "초기화" 클릭 → 폼과 에러 상태가 모두 리셋되는지
+1. 아무것도 입력하지 않고 로그인 버튼 → 두 필드의 오류가 모두 뜨는가
+2. 이메일 칸에서 포커스를 벗어났을 때만(입력 중엔 아님) 그 필드 오류가 뜨는가
+3. `abc` 입력 → "올바른 이메일 형식이 아닙니다."
+4. 비밀번호 7자 → 오류, 8자 → 오류가 사라지는가
+5. 요청 중 버튼이 `로그인 중...`으로 바뀌고 비활성화되는가
 
 ---
 
-## 다음 단계 (study6 예정)
+## ⚠️ 오류 노트
 
-- 실제 `fetch`로 공개 API(JSONPlaceholder 등)를 호출해서 데이터를 가져오기
-- 로딩 상태, 에러 상태, 성공 상태를 반응형으로 관리하는 패턴 익히기
+| 증상 | 원인 | 해결 |
+|---|---|---|
+| 제출할 때마다 페이지가 새로고침 | `@submit.prevent`를 빼먹음 | `<form @submit.prevent="...">` |
+| 한글 입력 중 글자가 한 박자 늦게 반영 | IME 조합 중에는 `v-model`이 조합 종료 후 갱신 | 정상 동작. 즉시 반응이 필요하면 `@input` 사용 |
+| 입력 중인데 오류가 먼저 뜸 | `touched` 없이 바로 표시 | blur/제출 이후에만 표시 |
+| 숫자 입력이 문자열로 들어옴 | `<input type="number">`도 기본은 문자열인 경우 있음 | `v-model.number` |
+| 체크박스 값이 `true/false`가 아니라 배열 | `v-model` 대상이 배열인 경우 | 단일 체크박스는 불리언 ref에 연결 |
+| 제출 버튼을 두 번 눌러 요청이 2번 감 | 중복 제출 방지 없음 | `loading` 동안 `:disabled`, 함수 초입에서 `if (loading.value) return` |
+| `Cannot read properties of undefined (reading 'email')` | 서버 오류 객체에 해당 필드가 없음 | `serverErrors.value[field]?.[0]` 처럼 옵셔널 체이닝 |
+
+---
+
+## ☐ 체크리스트
+
+- ☑ `v-model`(+ `.trim`)로 입력값 연결
+- ☑ `computed`로 필드별 오류 객체와 `isValid` 작성
+- ☑ `touched`/`submitted`로 오류 노출 시점 제어
+- ☑ `@submit.prevent`, `novalidate`, 중복 제출 방지(`:disabled`)
+- ☑ 로그인 폼(`LoginView.vue`)에 적용
+- ☐ 회원가입 폼 추가 + 비밀번호 확인 일치 검사
+- ☐ 서버 `error.fields`를 필드 아래에 표시 (실습 4, study6의 API 클라이언트 필요)
+- ☐ 게시글 작성 폼(제목 1~200자, 본문 필수) 검증 — [study6](./study6.md)의 작성·수정 화면에서 사용
+
+## ➡️ 다음 단계 연결
+
+폼에서 모은 값을 **서버에 보내고 결과를 받는** 단계가 남았습니다. [study6](./study6.md)에서 API 클라이언트를 만들고 게시글 CRUD(작성·수정 화면 포함)를 완성합니다.
