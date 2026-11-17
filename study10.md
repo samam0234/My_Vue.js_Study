@@ -4,6 +4,7 @@
 
 - 이전: [study9](./study9.md) 테스트·디버깅
 - 다음: [midpoint](./midpoint.md) — study0~10만으로 게시판+로그인 완성
+- 구현 위치: `demo/`·`project/` 의 `public/_redirects`, `vercel.json`, `vite.config` 의 `base`(`BASE_PATH`)
 
 ---
 
@@ -117,12 +118,12 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 
 ### 실습 5. 배포 전 점검표
 
-- ☐ `npm run build`가 오류 없이 끝난다
-- ☐ `npm run preview`에서 모든 화면과 새로고침 동작 확인
-- ☐ `console.log`, `debugger`, 테스트용 계정 채우기 버튼 제거
-- ☐ `.env.production`에 비밀키가 **없다**
-- ☐ 로그인·API 오류 시 화면이 깨지지 않는다
-- ☐ `npm run test:run` 통과
+- ☑ `npm run build`가 오류 없이 끝난다 — `demo`, `project` 모두 확인
+- ☑ `npm run preview`에서 모든 화면과 새로고침 동작 확인 — Playwright E2E(운영 빌드 대상) 19개로 확인
+- ☑ `console.log`, `debugger`, 테스트용 계정 채우기 버튼 제거 — `project` 는 `VITE_ENABLE_MOCK` 로 운영 번들에서 제거, `grep` 으로 `dist/` 확인
+- ☑ `.env.production`에 비밀키가 **없다**
+- ☑ 로그인·API 오류 시 화면이 깨지지 않는다 — 단위·통합·E2E 테스트로 확인
+- ☑ `npm run test:run` 통과 — `demo` 17개, `project` 94개
 
 ---
 
@@ -203,11 +204,11 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 ## ☐ 체크리스트
 
 - ☑ 기초 구간 개념(study0~7)을 `demo/`·`project/`에서 직접 실습
-- ☐ `npm run build` → `dist/` 구조 확인
-- ☐ `npm run preview`로 운영과 유사하게 확인
-- ☐ SPA fallback을 한 가지 방법(Netlify/Vercel/Nginx)으로 설정
+- ☑ `npm run build` → `dist/` 구조 확인
+- ☑ `npm run preview`로 운영과 유사하게 확인
+- ☑ SPA fallback을 한 가지 방법(Netlify/Vercel/Nginx)으로 설정 — `demo/`·`project/` 의 `public/_redirects`, `vercel.json`, `project/nginx/`
 - ☐ 정적 호스팅에 배포하고 `/posts/1` 새로고침 동작 확인
-- ☐ 배포 전 점검표 6개 항목 통과
+- ☑ 배포 전 점검표 6개 항목 통과
 - ☐ 복습 문제 12개를 정답을 보지 않고 설명
 
 ## ➡️ 다음 단계 연결
