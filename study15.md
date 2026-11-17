@@ -4,7 +4,8 @@
 
 - 이전: [study14](./study14.md) 타입·정적 분석
 - 기초 테스트는 [study9](./study9.md) — 여기서는 그 위에 **통합·E2E·커버리지·CI**를 쌓는다.
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다.
+- 구현 위치: [`project/src/**/*.spec.ts`](./project/src), [`project/src/mocks/`](./project/src/mocks)(MSW 핸들러·메모리 DB), [`project/e2e/board.spec.ts`](./project/e2e/board.spec.ts), [`project/playwright.config.ts`](./project/playwright.config.ts), [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
+- 실측: 단위·통합 94개 통과(분기 커버리지 약 81%), E2E 19개 통과(약 13초). 구현 메모: 이 저장소의 E2E 는 `page.route` 대신 **MSW 목 서버를 켠 빌드(`vite build --mode e2e`)** 를 대상으로 해서 단위·통합·E2E 가 같은 가짜 서버(`handlers.ts`)를 공유합니다.
 
 ---
 
@@ -152,7 +153,7 @@ describe('PostListView (통합)', () => {
 
 | 줄 | 설명 |
 |---|---|
-| `onUnhandledRequest: 'error'` | 테스트가 예상치 못한 요청을 하면 실패 → 숨은 네트워크 호출 발견 |
+| `onUnhandledFrame: 'error'` | 테스트가 예상치 못한 요청을 하면 실패 → 숨은 네트워크 호출 발견 (MSW 2 까지는 `onUnhandledRequest`) |
 | `server.use(...)` | 특정 테스트에서만 핸들러를 덮어써 **오류 시나리오** 재현 |
 | `flushPromises()` | 대기 중인 Promise(fetch, 렌더)를 모두 처리 |
 | `afterEach(resetHandlers)` | 덮어쓴 핸들러가 다음 테스트로 새지 않게 |
@@ -317,6 +318,8 @@ jobs:
 
 ## ⚠️ 오류 노트
 
+> 실제로 겪은 함정 3가지: ① **jsdom 에서 `err instanceof DOMException` 이 거짓**이다(Node 의 fetch 가 던지는 `DOMException` 과 jsdom 의 것이 다른 클래스) → `err.name === 'AbortError'` 로 판별. ② 통합 테스트에서 `flushPromises()` 만으로는 MSW 응답(타이머)을 못 기다린다 → 짧게 쉬며 반복하는 `settle()` 헬퍼, 그리고 테스트 모드에서는 목 서버 지연을 0 으로. ③ Playwright `getByLabel('제목')` 은 부분 일치라 `제목·본문 검색` 입력까지 잡는다 → `{ exact: true }` 와 화면 전환 대기.
+
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | MSW: `[MSW] Cannot bypass a request when using the "error" strategy for the "onUnhandledRequest"` | 핸들러에 없는 요청 발생 | 핸들러 추가 (의도한 요청인지도 점검) |
@@ -335,11 +338,11 @@ jobs:
 ## ☐ 체크리스트
 
 - ☐ 테스트 피라미드에서 단위/통합/E2E의 역할을 설명
-- ☐ `@vitest/coverage-v8`로 커버리지를 보고 빠진 분기 1곳 보완
-- ☐ MSW로 API를 가로채 목록 화면 통합 테스트(성공 + 500 오류)
-- ☐ Playwright E2E 2개 (로그인 리다이렉트, 새로고침 후 로그인 유지)
-- ☐ `npm run ci`(lint → type-check → test → build) 스크립트
-- ☐ `.github/workflows/ci.yml`로 push·PR마다 자동 실행
+- ☑ `@vitest/coverage-v8`로 커버리지를 보고 빠진 분기 1곳 보완 — `thresholds` 로 최소치 설정
+- ☑ MSW로 API를 가로채 목록 화면 통합 테스트(성공 + 500 오류) — `views.spec.ts`
+- ☑ Playwright E2E 2개 (로그인 리다이렉트, 새로고침 후 로그인 유지) — 19개 (로그인 리다이렉트, 새로고침 유지, CRUD, AI 스트리밍, 모바일 폭 등)
+- ☑ `npm run ci`(lint → type-check → test → build) 스크립트
+- ☐ `.github/workflows/ci.yml`로 push·PR마다 자동 실행 — 파일은 작성했고, push 후 GitHub Actions 탭에서 첫 실행을 확인한다
 - ☐ CI 실패 → 수정 → 성공 사이클을 한 번 경험
 - ☐ `npm ci`와 `npm install`의 차이를 설명
 
