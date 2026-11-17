@@ -8,9 +8,11 @@
 - Vue 3(+ Vite) 학습 기록 저장소입니다.
 - 학습 문서 순서: `study0`~`study10`(기초) → `midpoint`(중간 응용) → `study11`~`study18`(심화) → `final`(심화 응용). 전체 목차는 [../README.md](../README.md)를 따릅니다.
 - 각 문서 공통 구성: 목표 한 줄 → 이론 → 실기(코드·줄별 설명) → 오류 노트 → ☐ 체크리스트 → 다음 단계 연결. (`☑` = 코드로 구현 완료, `☐` = 미완료)
-- study8~18, `midpoint.md`, `final.md`의 코드는 아직 저장소에 반영하지 않은 실습 예시일 수 있습니다. 코드를 구현하면 해당 문서의 체크리스트를 `☑`로 갱신합니다.
-- `demo/`: study0~study7 범위를 개념별로 하나씩 실습하는 Vue 3 + Vite 프로젝트입니다. 실습 컴포넌트들이 홈 화면 한 페이지에 계속 누적되는 구조입니다.
-- `project/`: `studyFinal.md`에 대응하는, `demo/`에서 익힌 개념을 전부 합쳐 만든 완결된 미니 웹사이트(별도 Vue 3 + Vite 프로젝트)입니다. `midpoint.md`·`final.md`의 출발점입니다.
+- 문서 상단의 "구현 위치"가 해당 문서의 실제 코드 위치입니다. 코드를 구현·검증하면 문서의 체크리스트를 `☑`로 갱신하고, 실행하지 못한 항목(Docker 빌드, 실제 배포 등)은 `☐`로 두고 이유를 적습니다.
+- `demo/`: study0~study10 범위를 개념별로 하나씩 실습하는 Vue 3 + Vite(JS) 프로젝트입니다. 실습 컴포넌트들이 홈 화면 한 페이지에 계속 누적되는 구조입니다.
+- `project/`: `midpoint.md`·`final.md`를 구현한 Mini Board(TypeScript, Tailwind, Vitest, Playwright, Docker). `studyFinal.md`의 JSONPlaceholder 버전에서 출발해 공통 API 스펙 v1 기반으로 재구성했습니다. 백엔드가 없어 MSW 목 서버로 개발·테스트합니다.
+- `ai-proxy/`, `board-mcp/`: study18의 AI 프록시와 MCP 서버(각자 `package.json`, `npm test`).
+- 주의: `vite.config.js`와 `vite.config.ts`가 함께 있으면 `.js`가 먼저 읽혀 `.ts` 설정이 무시됩니다. 하나만 둡니다.
 - `studyFinal.md`: JSONPlaceholder 기반 첫 종합 실습 기록(유지). 새 `final.md`와는 별개입니다.
 
 ## 2. 작업 전 확인 사항
