@@ -1,13 +1,32 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import ProductCard from './ProductCard.vue'
 
 // 부모가 데이터의 "원본"을 가지고 있습니다. 자식은 이 데이터를 받아서 보여주기만 합니다.
-const products = ref([
-  { id: 1, name: '무선 키보드', price: 45000, favorite: false },
-  { id: 2, name: '모니터 암', price: 32000, favorite: true },
-  { id: 3, name: '노트북 거치대', price: 18000, favorite: false },
-])
+// study3 실습 3: 즐겨찾기를 새로고침 후에도 유지한다 (watch + localStorage).
+const FAVORITES_KEY = 'demo:favorite-ids'
+
+function loadFavoriteIds() {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_KEY)) ?? [2]
+  } catch {
+    return [2] // 저장값이 깨졌을 때도 앱이 시작되도록
+  }
+}
+
+const savedIds = loadFavoriteIds()
+const products = ref(
+  [
+    { id: 1, name: '무선 키보드', price: 45000 },
+    { id: 2, name: '모니터 암', price: 32000 },
+    { id: 3, name: '노트북 거치대', price: 18000 },
+  ].map((p) => ({ ...p, favorite: savedIds.includes(p.id) })),
+)
+
+watch(
+  () => products.value.filter((p) => p.favorite).map((p) => p.id),
+  (ids) => localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids)),
+)
 
 const selectedId = ref(null)
 
