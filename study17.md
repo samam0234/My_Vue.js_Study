@@ -3,7 +3,9 @@
 > 🎯 **목표**: Vue 앱을 멀티 스테이지 Dockerfile로 **Nginx 이미지**로 묶고, GitHub Actions가 이미지를 빌드·푸시한 뒤 외부 서비스에 **자동 배포**하는 과정을 만든다.
 
 - 이전: [study16](./study16.md) 보안·운영 (보안 헤더, SPA fallback을 Nginx 설정에 담는다)
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다. 배포 대상 서비스는 선택이며, 실제 배포 전에는 계정·비밀 값 설정을 직접 확인하세요.
+- 구현 위치: [`project/Dockerfile`](./project/Dockerfile), [`project/nginx/`](./project/nginx)(`default.conf.template`·`security-headers.conf`), [`project/.dockerignore`](./project/.dockerignore), [`docker-compose.yml`](./docker-compose.yml), [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+- **실행 검증 전**: 이 환경에서는 Docker 데몬을 띄우지 못해 `docker build`/`run` 은 실행하지 못했습니다(YAML 문법과 `npm run ci` 는 확인). 직접 `docker build` 해서 확인하세요. 배포 대상 서비스는 선택이며, 실제 배포 전에는 계정·비밀 값 설정을 직접 확인하세요.
+- 아래 `nginx.conf` 예시와 달리 실제 구현은 **nginx 공식 이미지의 템플릿 기능**(`/etc/nginx/templates/*.template` 의 `${API_UPSTREAM}` 치환)을 쓰고, 보안 헤더는 `include` 파일로 분리해 모든 `location` 에 반복합니다(`add_header` 상속 문제 해결).
 
 ---
 
@@ -354,15 +356,15 @@ Actions의 마지막 단계에 위 `curl`을 넣어 **배포가 살아 있는지
 
 ## ☐ 체크리스트
 
-- ☐ 멀티 스테이지 `Dockerfile` + `nginx.conf` + `.dockerignore` 작성
+- ☑ 멀티 스테이지 `Dockerfile` + `nginx.conf` + `.dockerignore` 작성 — 작성 완료(미실행)
 - ☐ `docker build` / `docker run`으로 로컬 확인, SPA fallback·보안 헤더 확인
 - ☐ 레이어 캐시(의존성 먼저 복사)로 재빌드 속도 개선 확인
 - ☐ `VITE_*`가 "빌드 시점" 값이라는 것과 해결 방법 2가지를 설명
-- ☐ compose로 프론트 + 백엔드를 함께 실행 (또는 Nginx `/api` 프록시 설계)
-- ☐ GitHub Actions: `test → image(GHCR, sha 태그) → deploy`
+- ☑ compose로 프론트 + 백엔드를 함께 실행 (또는 Nginx `/api` 프록시 설계) — `docker-compose.yml` + Nginx `/api`·`/api/ai` 프록시 (미실행)
+- ☑ GitHub Actions: `test → image(GHCR, sha 태그) → deploy` — `deploy.yml` 작성 완료(첫 실행 전)
 - ☐ 컨테이너/정적 호스팅 중 한 곳에 실제 자동 배포
-- ☐ 배포 후 smoke test(`/healthz`, `/posts/1`)와 롤백 방법(이전 sha 태그) 정리
-- ☐ 비밀은 `secrets`, 공개 값은 `vars`로 구분
+- ☑ 배포 후 smoke test(`/healthz`, `/posts/1`)와 롤백 방법(이전 sha 태그) 정리 — `deploy.yml` 의 smoke test 단계 (`SITE_URL` 변수를 설정하면 실행)
+- ☑ 비밀은 `secrets`, 공개 값은 `vars`로 구분 — `DEPLOY_HOOK_URL` 은 secrets, `VITE_API_BASE_URL`·`SITE_URL` 은 vars
 
 ## ➡️ 다음 단계 연결
 
