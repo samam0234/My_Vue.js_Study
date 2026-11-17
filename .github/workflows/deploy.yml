@@ -43,7 +43,7 @@ jobs:
         # GHCR 이미지 이름은 소문자여야 한다
         run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/mini-board-web" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
