@@ -3,7 +3,7 @@
 > 🎯 **목표**: Vue Router로 URL과 화면을 연결하고(목록 → 상세), "URL 변경 → 화면 전환 → 데이터 요청 → 응답 표시"의 흐름을 이해한다.
 
 - 이전: [study3](./study3.md) 데이터 다루기
-- 대응 코드: [`demo/src/router/index.js`](./demo/src/router/index.js), [`project/src/router/index.js`](./project/src/router/index.js), `ProductListView.vue`, `ProductDetailView.vue`, `PostDetailView.vue`
+- 대응 코드: [`demo/src/router/index.js`](./demo/src/router/index.js), [`project/src/router/index.ts`](./project/src/router/index.ts), `ProductListView.vue`, `ProductDetailView.vue`, `PostDetailView.vue`
 
 ---
 
@@ -48,7 +48,7 @@ View의 onMounted / watch에서 fetch 요청 → 서버(API)가 JSON 응답
 
 ## 🛠️ 실기
 
-### 실습 1. 라우트 설정 — `project/src/router/index.js`
+### 실습 1. 라우트 설정 — `project/src/router/index.ts`
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
@@ -201,8 +201,8 @@ cd project && npm run dev
 - ☑ `route.params.id`로 상세 데이터 요청, `Promise.all`로 병렬 fetch
 - ☑ 같은 라우트에서 id만 바뀌는 경우를 `watch`로 처리
 - ☑ `useRoute`(읽기)와 `useRouter`(이동)를 구분
-- ☐ 쿼리스트링(`?q=`)으로 검색어 유지 (실습 5)
-- ☐ 404 catch-all 라우트 + `NotFoundView.vue` 추가 (실습 6)
+- ☑ 쿼리스트링(`?q=`)으로 검색어 유지 (실습 5) — `demo/ProductListView`, `project/PostListView`
+- ☑ 404 catch-all 라우트 + `NotFoundView.vue` 추가 (실습 6) — `demo/NotFoundView`, `project/NotFoundView`
 - ☐ Network 탭에서 "HTML 요청 없이 화면이 전환됨"을 직접 확인
 
 ## ➡️ 다음 단계 연결
