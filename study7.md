@@ -3,7 +3,8 @@
 > 🎯 **목표**: Pinia로 로그인 상태를 공유하고, 가상 로그인을 **실제 로그인(`accessToken`)** 으로 바꾸며, 새로고침 후 유지·라우트 가드·401/403 처리를 구현한다.
 
 - 이전: [study6](./study6.md) DB·API 연동
-- 대응 코드: [`demo/src/stores/auth.js`](./demo/src/stores/auth.js), [`project/src/stores/auth.js`](./project/src/stores/auth.js), `AppHeader.vue`, `LoginView.vue`
+- 대응 코드: [`demo/src/stores/auth.js`](./demo/src/stores/auth.js)(가상 로그인), [`project/src/stores/auth.ts`](./project/src/stores/auth.ts)(실제 로그인·토큰), [`project/src/router/index.ts`](./project/src/router/index.ts)(가드), [`project/src/api/client.ts`](./project/src/api/client.ts)(401 처리)
+- 구현 메모: `project/` 는 TypeScript 이고, 스토어↔라우터 순환 import 를 피하려고 `authed()` 대신 `configureApi({ getToken, onUnauthorized })` 훅을 `main.ts` 에서 주입합니다.
 
 ---
 
@@ -256,11 +257,11 @@ const isMine = computed(() => auth.user?.id === post.value?.author.id)
 
 - ☑ Pinia setup store(`ref`/`computed`/함수)로 로그인 상태 공유, 헤더·로그인·목록에서 같은 스토어 사용
 - ☑ 가상 로그인(JSONPlaceholder 이메일 매칭)으로 흐름 확인
-- ☐ **가상 로그인을 실제 로그인으로 — 응답의 `accessToken` 처리** (`POST /api/auth/login`)
-- ☐ **새로고침 후 로그인 유지** (`localStorage` + `restore()`, 또는 검증된 persist 플러그인/쿠키)
-- ☐ **401이면 로그인 화면, 403이면 안내 메시지로 분기**
-- ☐ `router.beforeEach` + `meta.requiresAuth`로 작성·수정 화면 보호, 로그인 후 `redirect` 복귀
-- ☐ 내 글(`author.id === user.id`)에만 수정·삭제 버튼 표시
+- ☑ **가상 로그인을 실제 로그인으로 — 응답의 `accessToken` 처리** (`POST /api/auth/login`) — `POST /api/auth/login` (MSW 목 서버로 검증, 실제 서버 연결은 프록시 주소만 바꾸면 됨)
+- ☑ **새로고침 후 로그인 유지** (`localStorage` + `restore()`, 또는 검증된 persist 플러그인/쿠키) — `localStorage` + `restore()`, 복원 후에 라우터를 설치해 깜빡임 방지
+- ☑ **401이면 로그인 화면, 403이면 안내 메시지로 분기** — `api/client.ts` 의 `onUnauthorized` 훅 + 화면별 403 안내
+- ☑ `router.beforeEach` + `meta.requiresAuth`로 작성·수정 화면 보호, 로그인 후 `redirect` 복귀 — `meta.requiresAuth`/`guestOnly`, `redirect` 복귀 (열린 리다이렉트 방지)
+- ☑ 내 글(`author.id === user.id`)에만 수정·삭제 버튼 표시 — `PostDetailView`, 댓글 삭제 버튼
 - ☐ `localStorage` 토큰의 XSS 위험을 한 문장으로 설명할 수 있다
 
 ## ➡️ 다음 단계 연결
