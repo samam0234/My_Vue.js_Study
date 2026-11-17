@@ -22,7 +22,17 @@ onMounted(() => {
 })
 
 // onUpdated: 반응형 데이터가 바뀌어서 화면이 갱신될 때마다
+//
+// 주의: onUpdated 안에서 화면에 보이는 상태(여기서는 로그)를 바꾸면 그것이 또 화면 갱신을 일으켜
+// onUpdated 가 끝없이 다시 실행된다(Maximum call stack size exceeded). 그래서
+// "로그를 추가해서 생긴 갱신"은 한 번 건너뛰어 무한 반복을 끊는다.
+let skipNextUpdate = false
 onUpdated(() => {
+  if (skipNextUpdate) {
+    skipNextUpdate = false
+    return
+  }
+  skipNextUpdate = true
   renderCount.value++
   addLifecycleLog(`onUpdated: 화면 갱신됨 (#${renderCount.value})`)
 })

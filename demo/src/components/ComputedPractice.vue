@@ -4,21 +4,25 @@ import { ref, computed } from 'vue'
 const price = ref(1000)
 const quantity = ref(3)
 
-// 계산 횟수를 추적
-let computedCallCount = ref(0)
-let functionCallCount = ref(0)
+// 계산 횟수를 추적한다.
+// 주의: 횟수를 ref 로 만들고 computed/렌더링 중에 증가시키면, 렌더링이 자기가 읽는 값을 바꿔
+// 무한히 다시 렌더링된다(콘솔 로그가 끝없이 찍힘). 그래서 횟수는 일반 변수로 두고,
+// "렌더링 트리거" 버튼은 별도의 반응형 값(renderTick)으로 컴포넌트를 다시 그리게 한다.
+let computedCallCount = 0
+let functionCallCount = 0
+const renderTick = ref(0)
 
 // computed 방식: 의존성(price, quantity)이 바뀔 때만 재계산
 const totalComputed = computed(() => {
-  computedCallCount.value++
-  console.log(`[computed] 계산 중... (총 ${computedCallCount.value}회)`)
+  computedCallCount++
+  console.log(`[computed] 계산 중... (총 ${computedCallCount}회)`)
   return price.value * quantity.value
 })
 
 // 함수 방식: 호출할 때마다 계산
 function getTotalFunction() {
-  functionCallCount.value++
-  console.log(`[function] 계산 중... (총 ${functionCallCount.value}회)`)
+  functionCallCount++
+  console.log(`[function] 계산 중... (총 ${functionCallCount}회)`)
   return price.value * quantity.value
 }
 
@@ -29,8 +33,9 @@ const discountedTotal = computed(() => {
 })
 
 function triggerRerender() {
-  // 아무것도 바꾸지 않지만 렌더링은 일어남
-  // computed는 캐시된 값을 반환하고, 함수는 매번 계산함
+  // 가격·수량은 그대로 두고 컴포넌트만 다시 그리게 한다.
+  // computed는 캐시된 값을 반환하고(횟수 그대로), 함수는 매번 다시 계산한다(횟수 증가).
+  renderTick.value++
 }
 </script>
 
@@ -79,7 +84,7 @@ function triggerRerender() {
     </div>
 
     <button @click="triggerRerender" style="width: 100%; margin-top: 1rem">
-      렌더링 트리거 (입력값 변경 없이 컴포넌트만 갱신)
+      렌더링 트리거 (입력값 변경 없이 컴포넌트만 갱신) — 지금까지 {{ renderTick }}번
     </button>
 
     <p style="margin-top: 1rem; font-size: 0.9rem; color: #666">
