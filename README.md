@@ -59,10 +59,19 @@ vue.js/
 ├─ study0.md ~ study10.md     # 기초 구간
 ├─ midpoint.md                # 중간 응용
 ├─ study11.md ~ study18.md    # 후반 심화 구간
-├─ final.md                   # 심화 응용
+├─ final.md                   # 심화 응용 (실측 기록표 포함)
 ├─ studyFinal.md              # 첫 종합 실습 기록 (JSONPlaceholder 미니 게시판)
-├─ demo/                      # 개념별 실습 연습장 (Vue 3 + Vite)
-├─ project/                   # 미니 게시판 (Vue 3 + Vite + Router + Pinia)
+├─ demo/                      # study0~10 개념별 실습 연습장 (JS, Vue 3 + Vite, Vitest)
+├─ project/                   # Mini Board — midpoint + final 구현 (TypeScript, Tailwind, Vitest, Playwright, Docker)
+│  ├─ src/{api,mocks,stores,composables,components,views,router,utils,config,types,test}
+│  ├─ e2e/                    # Playwright E2E
+│  ├─ nginx/ · Dockerfile     # 운영 이미지 (Nginx)
+│  └─ mock-public/            # MSW 워커 스크립트 (개발·E2E 빌드에서만 제공)
+├─ ai-proxy/                  # AI 프록시 (키 보관·로그인 확인·SSE 중계), 테스트 포함
+├─ board-mcp/                 # 게시판 읽기 전용 MCP 서버, 테스트 포함
+├─ docker-compose.yml         # web(Nginx) + backend + ai-proxy
+├─ .mcp.json                  # MCP 서버 등록
+├─ .github/                   # CI(ci.yml), 배포(deploy.yml), Dependabot
 └─ .agent/ .claude/ .codex/ .grok/   # 작업 규칙·에이전트별 인수인계 문서
 ```
 
@@ -71,30 +80,54 @@ vue.js/
 요구 사항: **Node.js `^22.18.0` 또는 `>=24.12.0`** (`package.json`의 `engines`)
 
 ```bash
-# 연습장
+# 연습장 (study0~10)
 cd demo
 npm install
-npm run dev        # http://localhost:5173
+npm run dev          # http://localhost:5173
+npm run test:run     # Vitest
 
-# 미니 게시판
+# Mini Board (midpoint + final)
 cd project
 npm install
-npm run dev
+npm run dev          # 백엔드 없이 MSW 목 서버로 동작 (계정: mina@example.com / password123)
 ```
+
+### project/ 명령
 
 | 명령 | 설명 |
 |---|---|
-| `npm run dev` | 개발 서버 (HMR) |
-| `npm run build` | 배포용 빌드 → `dist/` |
-| `npm run preview` | 빌드 결과를 로컬에서 확인 |
+| `npm run dev` | 개발 서버. 기본값은 **목 서버 ON**(`.env.development`의 `VITE_ENABLE_MOCK=true`) |
+| `npm run build` | 타입 검사 + 운영 빌드 → `dist/` (목 서버·개발용 계정은 번들에서 제외) |
+| `npm run preview` | 빌드 결과 확인 |
+| `npm run lint` / `type-check` | ESLint / vue-tsc |
+| `npm run test:run` / `test:coverage` | Vitest 단위·통합 (MSW) / 커버리지 |
+| `npm run test:e2e` | Playwright E2E (운영 빌드 + 목 서버, 최초 1회 `npx playwright install chromium`) |
+| `npm run ci` | lint → type-check → test → build |
+| `npm run build:analyze` | 번들 분석 `dist/stats.html` |
 
-사용 버전: Vue 3.5, Vue Router 5, Pinia 4, Vite 8.
+실제 백엔드(공통 API 스펙 v1)에 붙이려면 `project/.env.development.local` 에 `VITE_ENABLE_MOCK=false` 를 두면 Vite 프록시가 `/api` 를 `localhost:8000` 으로 보냅니다(AI 는 `/api/ai` → `localhost:8787`).
+
+```bash
+# AI 프록시 / MCP 서버 (각각 npm install 후)
+cd ai-proxy  && npm test      # 키가 필요하면 ANTHROPIC_API_KEY 환경변수로 (코드·git 에 넣지 않는다)
+cd board-mcp && npm test
+```
+
+사용 버전: Vue 3.5, Vue Router 5, Pinia 4, Vite 8, TypeScript 6, Vitest 5, Playwright 1.6x, MSW 3.
 
 ## 현재 구현 상태와 문서의 관계
 
-- **구현 완료(코드 있음)**: study0~7 범위의 실습 — `demo/`(개념별), `project/`(JSONPlaceholder + 가상 로그인 미니 게시판)
-- **계획·예시 코드(문서만 있음)**: study8~18, midpoint, final의 코드는 **아직 저장소에 반영하지 않은 실습 예시**입니다. 문서의 `☐`는 직접 실습하며 체크합니다. (`☑` = 이미 코드로 구현한 항목)
-- 백엔드 연동(study6~7, midpoint)은 **「공통 API 스펙 v1」**(`/api/posts`, `/api/auth/*`, `{ data }` / `{ error }` 응답 형식)을 따르는 서버를 전제로 합니다.
+| 범위 | 상태 |
+|---|---|
+| study0~7 | `demo/` 개념별 실습 + `project/` 구현 완료 |
+| study8~10 | `demo/`(환경변수·composable·Vitest·SPA fallback), `project/` 구현 완료 |
+| midpoint | `project/` 의 기능 F1~F9 구현, 테스트 통과 |
+| study11~16, 18 | `project/`, `ai-proxy/`, `board-mcp/` 구현·테스트 통과 (실제 AI API 호출만 미검증) |
+| study17 | `Dockerfile`·`nginx/`·`docker-compose.yml`·`deploy.yml` **작성 완료, 아직 실행하지 않음**(Docker 데몬·GitHub Actions 첫 실행 전) |
+| final | 실측 기록표 작성. Lighthouse·컨테이너 실행·실제 배포는 미측정/미실행 |
+
+- 문서의 `☑` 는 코드로 구현하고 확인한 항목, `☐` 는 아직 하지 않았거나 학습자가 직접 해 보는 항목(설명하기, 수동 확인, 실제 배포 등)입니다.
+- 백엔드가 없어서 API 는 **MSW 목 서버**(`project/src/mocks/`)가 대신하고, 단위·통합·E2E 가 같은 핸들러를 공유합니다. 백엔드 연동은 **「공통 API 스펙 v1」**(`/api/posts`, `/api/auth/*`, `{ data }` / `{ error }` 응답 형식)을 따르는 서버를 전제로 합니다.
 
 ## 기존 문서 → 새 문서 매핑
 
