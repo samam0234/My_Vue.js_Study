@@ -3,7 +3,8 @@
 > 🎯 **목표**: 프론트(Vue)는 DB에 직접 접근하지 않고 **HTTP API**로 CRUD 한다는 구조를 이해하고, `fetch` 클라이언트를 만들어 공개 API → 실제 백엔드 API 순서로 게시판 CRUD와 작성·수정 화면을 만든다.
 
 - 이전: [study5](./study5.md) 폼 검증
-- 대응 코드: [`demo/src/components/FetchApiPractice.vue`](./demo/src/components/FetchApiPractice.vue), [`project/src/views/PostListView.vue`](./project/src/views/PostListView.vue) (현재는 JSONPlaceholder)
+- 대응 코드: [`demo/src/components/FetchApiPractice.vue`](./demo/src/components/FetchApiPractice.vue)(JSONPlaceholder), [`project/src/api/`](./project/src/api)(`client.ts`·`posts.ts`·`comments.ts`·`auth.ts`), [`project/src/views/PostFormView.vue`](./project/src/views/PostFormView.vue)
+- 구현 메모: `project/` 는 [study14](./study14.md) 이후 TypeScript(`.ts`)라 아래 JS 예시와 확장자·타입만 다릅니다. 백엔드가 없는 동안은 **MSW 목 서버**(`project/src/mocks/`)가 공통 API 스펙 v1 을 흉내 냅니다(`npm run dev` 기본값).
 
 ---
 
@@ -319,11 +320,11 @@ cd project && npm run dev
 - ☑ `fetch`로 GET 요청, `res.ok` 확인, loading/error/success 3종 상태 관리 (JSONPlaceholder)
 - ☑ `Promise.all`로 상세·댓글 병렬 요청 ([study4](./study4.md))
 - ☑ 오류 시 "다시 시도" 버튼 제공
-- ☐ `src/api/client.js`(오류 구조화) + `src/api/posts.js` 작성
-- ☐ **대표 조합 2번(Vue + Django + MySQL)의 Django API에 게시판 연결 — CORS 또는 Vite 프록시**
-- ☐ 목록의 검색(`q`)·페이지(`page`/`meta.totalPages`) 연결
-- ☐ **작성·수정 화면** (`PostFormView.vue`, 서버 `error.fields` 표시) — Notion 체크 항목
-- ☐ 삭제 (204 처리 + 화면 갱신)
+- ☑ `src/api/client.js`(오류 구조화) + `src/api/posts.js` 작성 — `project/src/api/client.ts`, `posts.ts`
+- ☐ **대표 조합 2번(Vue + Django + MySQL)의 Django API에 게시판 연결 — CORS 또는 Vite 프록시** — Vite 프록시(`/api` → `localhost:8000`)와 `.env` 설정은 끝났다. 실제 Django 서버가 생기면 `.env.development.local` 에 `VITE_ENABLE_MOCK=false` 를 두고 연결해 확인한다.
+- ☑ 목록의 검색(`q`)·페이지(`page`/`meta.totalPages`) 연결 — `PostListView` (디바운스·URL 동기화·취소 포함)
+- ☑ **작성·수정 화면** (`PostFormView.vue`, 서버 `error.fields` 표시) — Notion 체크 항목 — `PostFormView.vue`
+- ☑ 삭제 (204 처리 + 화면 갱신) — `PostDetailView.vue`
 
 ## ➡️ 다음 단계 연결
 
