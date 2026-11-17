@@ -4,7 +4,8 @@
 
 - 이전: [study13](./study13.md) 생태계 라이브러리
 - Notion 체크 항목: **TypeScript 도입**
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다.
+- 구현 위치: [`project/`](./project) 전체 — `tsconfig.json`, `env.d.ts`, `src/types/api.ts`, `eslint.config.js`, `.prettierrc.json`. `demo/` 는 study0~10 범위라 JS 로 유지합니다.
+- 버전 메모: 이 저장소는 TypeScript 6, ESLint 10, vue-tsc 3 입니다. TypeScript 6 에서는 `baseUrl` 이 deprecated 라 `paths` 만 둡니다(아래 반영).
 
 ---
 
@@ -60,8 +61,7 @@ npm install -D typescript vue-tsc @types/node
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "types": ["vite/client"],
-    "baseUrl": ".",
+    "types": ["vite/client", "node", "vitest/globals"],
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.js", "env.d.ts"]
@@ -328,6 +328,8 @@ ESLint는 "버그", Prettier는 "모양"을 맡는다. 둘이 규칙으로 충�
 
 ## ⚠️ 오류 노트
 
+> **가장 큰 함정 — `vite.config.js` 와 `vite.config.ts` 가 함께 있으면 `.js` 가 먼저 읽힙니다.** JS → TS 전환 때 새 `vite.config.ts` 를 만들고 옛 `vite.config.js` 를 지우지 않으면, `.ts` 에 넣은 플러그인·프록시·청크 설정이 에러 없이 **통째로 무시**됩니다(Tailwind 유틸리티가 안 만들어지는 식으로 나타남). 전환할 때 `ls vite.config.*` 로 하나만 남았는지 확인하세요. (Vitest 는 `.ts` 를 읽어서 테스트는 통과하는데 빌드만 이상해지므로 더 찾기 어렵습니다.)
+
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | `.vue` 안에서 `Cannot find module './X.vue'` | `.vue` 타입 선언 없음 | `vue-tsc` + Volar 사용(타입 선언 shim 불필요), `include`에 `*.vue` 포함 |
@@ -344,13 +346,13 @@ ESLint는 "버그", Prettier는 "모양"을 맡는다. 둘이 규칙으로 충�
 
 ## ☐ 체크리스트
 
-- ☐ `typescript`, `vue-tsc`, `tsconfig.json`, `env.d.ts` 설정
-- ☐ `npm run type-check` 스크립트, `build`에 연결
-- ☐ **TypeScript 도입 (Notion 체크 항목)**: `types/api.ts`로 API 응답 타입 정의
-- ☐ `api/*`, `stores/*`를 TS로 전환
-- ☐ `defineProps<{}>()` / `defineEmits<{}>()` 타입 선언 적용
-- ☐ ESLint(flat config) + `npm run lint` 통과
-- ☐ Prettier + 저장 시 포맷
+- ☑ `typescript`, `vue-tsc`, `tsconfig.json`, `env.d.ts` 설정
+- ☑ `npm run type-check` 스크립트, `build`에 연결 — `"build": "npm run type-check && vite build"`
+- ☑ **TypeScript 도입 (Notion 체크 항목)**: `types/api.ts`로 API 응답 타입 정의 — `project/src/types/api.ts`
+- ☑ `api/*`, `stores/*`를 TS로 전환 — `project/` 전체가 TS (`.vue` 는 `<script setup lang="ts">`)
+- ☑ `defineProps<{}>()` / `defineEmits<{}>()` 타입 선언 적용
+- ☑ ESLint(flat config) + `npm run lint` 통과 — `eslint-plugin-vue` + `@vue/eslint-config-typescript` + prettier skip-formatting
+- ☑ Prettier + 저장 시 포맷 — `.prettierrc.json` (저장 시 포맷은 에디터 설정)
 - ☐ "Vite는 타입 검사를 하지 않는다"를 설명할 수 있다
 - ☐ 일부러 낸 타입 오류가 빌드에서 잡히는 것을 확인
 
