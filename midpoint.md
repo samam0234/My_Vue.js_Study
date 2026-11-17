@@ -6,7 +6,7 @@
 - 다음: [study11](./study11.md) 심화 구간
 - 출발점: 이미 있는 [`project/`](./project) (JSONPlaceholder + 가상 로그인, [studyFinal.md](./studyFinal.md)에 정리)를 **실제 API 버전으로 승격**한다.
 - 새 라이브러리 금지 규칙: 사용 가능한 것은 `vue`, `vue-router`, `pinia`, `vite`, `vitest`, `@vue/test-utils`뿐. (axios, UI 라이브러리, TypeScript는 심화 구간에서)
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 구현 계획**입니다.
+- 구현 위치: [`project/`](./project). 이 문서의 계획을 따라 만들었고, 이후 심화 구간(TypeScript·캐시·Tailwind 등)까지 함께 적용된 상태입니다. 백엔드가 없어서 **MSW 목 서버**가 API 를 대신합니다(`npm run dev`).
 
 ---
 
@@ -167,29 +167,29 @@ watch(page, load)
 
 ### 기능
 
-- ☐ F1 목록·검색·페이지
-- ☐ F2 상세·댓글
-- ☐ F3 회원가입 (클라이언트 + 서버 오류 표시)
-- ☐ F4 로그인/로그아웃/새로고침 유지
-- ☐ F5 글 작성
-- ☐ F6 글 수정 (작성자만)
-- ☐ F7 글 삭제 (작성자만)
-- ☐ F8 401 → 로그인 화면(redirect 복귀), 403 → 안내
-- ☐ F9 404·연결 실패 화면
+- ☑ F1 목록·검색·페이지
+- ☑ F2 상세·댓글
+- ☑ F3 회원가입 (클라이언트 + 서버 오류 표시)
+- ☑ F4 로그인/로그아웃/새로고침 유지
+- ☑ F5 글 작성
+- ☑ F6 글 수정 (작성자만)
+- ☑ F7 글 삭제 (작성자만)
+- ☑ F8 401 → 로그인 화면(redirect 복귀), 403 → 안내
+- ☑ F9 404·연결 실패 화면
 
 ### 품질
 
-- ☐ 모든 API 호출이 `api/` 모듈을 통한다 (화면에 `fetch` 주소 없음)
-- ☐ `import.meta.env`는 `config/env.js`에서만 읽는다
-- ☐ `.env.local`·토큰·비밀 값이 git에 없다
-- ☐ `v-for` 모두 고유 `:key`
-- ☐ 요청 중 버튼 비활성화(중복 제출 방지)
-- ☐ Console에 `[Vue warn]`·빨간 오류 없음
+- ☑ 모든 API 호출이 `api/` 모듈을 통한다 (화면에 `fetch` 주소 없음) — (AI 스트리밍만 `useStreamSummary` 가 `fetch` 를 직접 사용 — SSE 를 읽어야 해서)
+- ☑ `import.meta.env`는 `config/env.js`에서만 읽는다 — 예외 2곳은 [study8](./study8.md) 오류 노트 참고
+- ☑ `.env.local`·토큰·비밀 값이 git에 없다
+- ☑ `v-for` 모두 고유 `:key`
+- ☑ 요청 중 버튼 비활성화(중복 제출 방지)
+- ☑ Console에 `[Vue warn]`·빨간 오류 없음 — 테스트 실행 중 `[Vue warn]` 0건
 
 ### 테스트·배포
 
-- ☐ `npm run test:run` 통과 (스토어 2 + 컴포넌트 1 + 검증 함수 1 이상)
-- ☐ `npm run build` 성공, `npm run preview`에서 전체 시나리오 통과
+- ☑ `npm run test:run` 통과 (스토어 2 + 컴포넌트 1 + 검증 함수 1 이상) — 94개
+- ☑ `npm run build` 성공, `npm run preview`에서 전체 시나리오 통과
 - ☐ 정적 호스팅 배포, 새로고침(SPA fallback)·CORS 확인
 
 ### 시나리오 점검 (수동)
