@@ -8,6 +8,7 @@ import PropsEmitPractice from '../components/PropsEmitPractice.vue'
 import FormValidationPractice from '../components/FormValidationPractice.vue'
 import FetchApiPractice from '../components/FetchApiPractice.vue'
 import LoginFormPractice from '../components/LoginFormPractice.vue'
+import ComposablePractice from '../components/ComposablePractice.vue'
 import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
@@ -33,6 +34,9 @@ import TheWelcome from '../components/TheWelcome.vue'
 
     <!-- study7: Pinia로 로그인 상태 공유 -->
     <LoginFormPractice />
+
+    <!-- study8: composable + 환경변수 -->
+    <ComposablePractice />
 
     <TheWelcome />
   </main>
