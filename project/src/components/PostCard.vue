@@ -1,75 +1,45 @@
-<script setup>
-defineProps({
-  post: {
-    type: Object,
-    required: true,
-  },
-  isFavorite: {
-    type: Boolean,
-    default: false,
-  },
-})
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+import type { Post } from '@/types/api'
+import { fromNow, formatDate } from '@/utils/format'
 
-// study3에서 배운 패턴: 이 컴포넌트는 데이터를 직접 바꾸지 않고 emit만 함
-const emit = defineEmits(['toggle-favorite'])
+withDefaults(defineProps<{ post: Post; isFavorite?: boolean }>(), { isFavorite: false })
 
-function handleFavoriteClick(event) {
-  event.preventDefault() // RouterLink 클릭(페이지 이동)을 막고 즐겨찾기만 토글
+// study2: 이 컴포넌트는 데이터를 바꾸지 않고 "눌렸다"고만 알린다. 로그인 확인은 부모가 한다.
+const emit = defineEmits<{ (e: 'toggle-favorite'): void }>()
+
+function handleFavoriteClick(event: Event) {
+  event.preventDefault() // RouterLink 의 페이지 이동을 막고 즐겨찾기만 토글
   event.stopPropagation()
   emit('toggle-favorite')
 }
 </script>
 
 <template>
-  <RouterLink :to="`/posts/${post.id}`" class="card">
-    <button class="favorite-btn" :class="{ active: isFavorite }" @click="handleFavoriteClick">
+  <RouterLink
+    :to="{ name: 'post-detail', params: { id: post.id } }"
+    class="relative block rounded-lg border border-slate-200 bg-white p-4 text-inherit no-underline transition hover:border-slate-400"
+  >
+    <button
+      type="button"
+      class="absolute right-3 top-3 text-xl leading-none"
+      :class="isFavorite ? 'text-amber-500' : 'text-slate-400'"
+      :aria-label="isFavorite ? '즐겨찾기 해제' : '즐겨찾기'"
+      :aria-pressed="isFavorite"
+      @click="handleFavoriteClick"
+    >
       {{ isFavorite ? '★' : '☆' }}
     </button>
-    <h3>{{ post.title }}</h3>
-    <p>{{ post.body.slice(0, 60) }}...</p>
+    <h3 class="mb-2 mr-8 text-base font-semibold text-slate-900">{{ post.title }}</h3>
+    <p class="mb-3 text-sm text-slate-600">
+      {{ post.body.slice(0, 60) }}{{ post.body.length > 60 ? '…' : '' }}
+    </p>
+    <p class="text-xs text-slate-500">
+      {{ post.author.nickname }} ·
+      <time :datetime="post.createdAt" :title="formatDate(post.createdAt)">{{
+        fromNow(post.createdAt)
+      }}</time>
+      · 댓글 {{ post.commentCount }}
+    </p>
   </RouterLink>
 </template>
-
-<style scoped>
-.card {
-  display: block;
-  position: relative;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s;
-}
-
-.card:hover {
-  border-color: #999;
-}
-
-.card h3 {
-  margin: 0.25rem 2rem 0.5rem 0;
-  font-size: 1rem;
-  text-transform: capitalize;
-}
-
-.card p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.favorite-btn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  border: none;
-  background: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #ccc;
-}
-
-.favorite-btn.active {
-  color: #f0ad4e;
-}
-</style>

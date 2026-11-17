@@ -1,72 +1,42 @@
-<script setup>
-import { useAuthStore } from '../stores/auth.js'
+<script setup lang="ts">
+import { useRouter, RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { env } from '@/config/env'
 
-const authStore = useAuthStore()
+const auth = useAuthStore()
+const router = useRouter()
+
+async function handleLogout() {
+  await auth.logout()
+  await router.push({ name: 'post-list' })
+}
 </script>
 
 <template>
-  <header class="app-header">
-    <RouterLink to="/" class="brand">📝 Mini Board</RouterLink>
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
+      <RouterLink :to="{ name: 'post-list' }" class="text-lg font-bold text-slate-800 no-underline">
+        📝 {{ env.appTitle }}
+      </RouterLink>
 
-    <nav>
-      <RouterLink to="/">게시글</RouterLink>
-      <RouterLink v-if="!authStore.isLoggedIn" to="/login">로그인</RouterLink>
-    </nav>
+      <nav class="flex flex-1 gap-4 text-sm" aria-label="주 메뉴">
+        <RouterLink :to="{ name: 'post-list' }">게시글</RouterLink>
+        <RouterLink v-if="auth.isLoggedIn" :to="{ name: 'post-new' }">글쓰기</RouterLink>
+      </nav>
 
-    <div class="auth-status">
-      <span v-if="authStore.isLoggedIn">
-        👤 {{ authStore.user.name }}님
-        <button @click="authStore.logout()">로그아웃</button>
-      </span>
-      <span v-else class="guest">로그인하지 않음</span>
+      <div class="flex items-center gap-3 text-sm">
+        <template v-if="auth.isLoggedIn">
+          <span data-testid="current-user">👤 {{ auth.user?.nickname }}님</span>
+          <button type="button" class="text-slate-500 hover:text-slate-800" @click="handleLogout">
+            로그아웃
+          </button>
+        </template>
+        <template v-else>
+          <span class="text-slate-400">로그인하지 않음</span>
+          <RouterLink :to="{ name: 'login' }">로그인</RouterLink>
+          <RouterLink :to="{ name: 'signup' }">회원가입</RouterLink>
+        </template>
+      </div>
     </div>
   </header>
 </template>
-
-<style scoped>
-.app-header {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.brand {
-  font-weight: 700;
-  text-decoration: none;
-  color: inherit;
-  font-size: 1.1rem;
-}
-
-nav {
-  display: flex;
-  gap: 1rem;
-  flex: 1;
-}
-
-nav a {
-  text-decoration: none;
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active {
-  font-weight: 700;
-  color: #3b82f6;
-}
-
-.auth-status {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.auth-status .guest {
-  color: #999;
-}
-
-.auth-status button {
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
-}
-</style>

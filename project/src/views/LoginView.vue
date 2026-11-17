@@ -1,146 +1,97 @@
-<script setup>
+<script setup lang="ts">
 import { reactive, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth.js'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import FormField from '@/components/FormField.vue'
+import AppButton from '@/components/AppButton.vue'
 
+const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const auth = useAuthStore()
 
 const form = reactive({ email: '', password: '' })
 const touched = reactive({ email: false, password: false })
 const submitted = ref(false)
 
+// study5: 필드별 오류를 computed 로 선언한다. 입력이 바뀔 때마다 자동으로 다시 검증된다.
 const errors = computed(() => {
-  const e = {}
-  if (!form.email.trim()) {
-    e.email = '이메일을 입력해주세요.'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+  const e: Record<string, string> = {}
+  if (!form.email.trim()) e.email = '이메일을 입력해주세요.'
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
     e.email = '올바른 이메일 형식이 아닙니다.'
-  }
-  if (!form.password) {
-    e.password = '비밀번호를 입력해주세요.'
-  } else if (form.password.length < 8) {
-    e.password = '비밀번호는 8자 이상이어야 합니다.'
-  }
+  if (!form.password) e.password = '비밀번호를 입력해주세요.'
+  else if (form.password.length < 8) e.password = '비밀번호는 8자 이상이어야 합니다.'
   return e
 })
-
 const isValid = computed(() => Object.keys(errors.value).length === 0)
 
-function markTouched(field) {
-  touched[field] = true
-}
+const showError = (field: 'email' | 'password') =>
+  (touched[field] || submitted.value) && errors.value[field] ? errors.value[field] : ''
 
-function shouldShowError(field) {
-  return (touched[field] || submitted.value) && errors.value[field]
+// 열린 리다이렉트를 막기 위해 같은 사이트 안의 경로만 허용한다.
+function safeRedirect(value: unknown): string {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
 }
 
 async function handleSubmit() {
   submitted.value = true
-  if (!isValid.value) return
-
-  const success = await authStore.login({ email: form.email, password: form.password })
-  if (success) {
-    router.push('/') // 로그인 성공 시 홈으로 이동
-  }
+  if (!isValid.value || auth.loading) return
+  const ok = await auth.login({ email: form.email.trim(), password: form.password })
+  if (ok) await router.push(safeRedirect(route.query.redirect)) // 원래 가려던 화면으로 복귀
 }
 
+// 개발용 목 서버 계정 채우기. 운영 빌드에서는 값이 'false' 로 치환되어 이 코드(와 계정 문자열)가 번들에서 사라진다.
+const showTestAccount = import.meta.env.VITE_ENABLE_MOCK === 'true'
+
 function fillTestAccount() {
-  form.email = 'Sincere@april.biz'
-  form.password = 'test1234'
+  if (import.meta.env.VITE_ENABLE_MOCK !== 'true') return
+  form.email = 'mina@example.com'
+  form.password = 'password123'
 }
 </script>
 
 <template>
-  <section class="login-view">
-    <h2>로그인</h2>
-
-    <p class="hint">
-      테스트 계정이 없다면
-      <button type="button" class="link-btn" @click="fillTestAccount">여기를 눌러 채우기</button>
+  <section class="mx-auto max-w-sm rounded-lg bg-white p-6 ring-1 ring-slate-200">
+    <h2 class="mb-2 text-xl font-bold">로그인</h2>
+    <p v-if="route.query.redirect" class="mb-3 text-sm text-slate-500">
+      로그인 후 이용할 수 있는 화면입니다.
     </p>
 
-    <form @submit.prevent="handleSubmit" novalidate>
-      <div class="field">
-        <label for="login-email">이메일</label>
-        <input
-          id="login-email"
-          v-model.trim="form.email"
-          type="text"
-          @blur="markTouched('email')"
-        />
-        <p v-if="shouldShowError('email')" class="error">{{ errors.email }}</p>
-      </div>
-
-      <div class="field">
-        <label for="login-password">비밀번호</label>
-        <input
-          id="login-password"
-          v-model="form.password"
-          type="password"
-          @blur="markTouched('password')"
-        />
-        <p v-if="shouldShowError('password')" class="error">{{ errors.password }}</p>
-      </div>
-
-      <button type="submit" :disabled="authStore.loading">
-        {{ authStore.loading ? '로그인 중...' : '로그인' }}
+    <p v-if="showTestAccount" class="mb-4 text-xs text-slate-500">
+      개발용 목 서버 계정:
+      <button type="button" class="text-blue-600 underline" @click="fillTestAccount">
+        여기를 눌러 채우기
       </button>
+    </p>
 
-      <p v-if="authStore.errorMessage" class="error server-error">
-        {{ authStore.errorMessage }}
+    <form novalidate @submit.prevent="handleSubmit">
+      <FormField
+        v-model="form.email"
+        label="이메일"
+        autocomplete="username"
+        :error="showError('email')"
+        @blur="touched.email = true"
+      />
+      <FormField
+        v-model="form.password"
+        label="비밀번호"
+        type="password"
+        autocomplete="current-password"
+        :error="showError('password')"
+        @blur="touched.password = true"
+      />
+
+      <AppButton type="submit" :loading="auth.loading">{{
+        auth.loading ? '로그인 중...' : '로그인'
+      }}</AppButton>
+
+      <p v-if="auth.errorMessage" role="alert" class="mt-3 text-sm text-red-600">
+        {{ auth.errorMessage }}
       </p>
     </form>
+
+    <p class="mt-4 text-sm text-slate-500">
+      계정이 없나요? <RouterLink :to="{ name: 'signup' }">회원가입</RouterLink>
+    </p>
   </section>
 </template>
-
-<style scoped>
-.login-view {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-}
-
-.hint {
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 1rem;
-}
-
-.link-btn {
-  border: none;
-  background: none;
-  color: #3b82f6;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font-size: 0.85rem;
-}
-
-.field {
-  margin-bottom: 1rem;
-}
-
-.field label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.field input {
-  width: 100%;
-  padding: 0.5rem;
-  box-sizing: border-box;
-}
-
-.error {
-  color: #d9534f;
-  font-size: 0.85rem;
-  margin: 0.25rem 0 0;
-}
-
-.server-error {
-  margin-top: 0.75rem;
-}
-</style>
