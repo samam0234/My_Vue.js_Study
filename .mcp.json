@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "board": {
+      "command": "node",
+      "args": ["board-mcp/server.js"],
+      "env": { "BOARD_API_BASE": "http://localhost:8000" }
+    }
+  }
+}
