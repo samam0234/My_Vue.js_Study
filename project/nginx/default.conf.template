@@ -1,0 +1,58 @@
+# study17: SPA fallback + 캐시 정책 + 보안 헤더 + 같은 도메인 /api 프록시
+server {
+  listen 80;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+
+  # Docker 내장 DNS. 백엔드 컨테이너가 나중에 떠도 요청 시점에 주소를 찾는다.
+  resolver 127.0.0.11 valid=10s ipv6=off;
+
+  include /etc/nginx/snippets/security-headers.conf;
+
+  location = /healthz {
+    access_log off;
+    default_type text/plain;
+    return 200 "ok\n";
+  }
+
+  # AI 프록시(스트리밍/SSE): 버퍼링을 끄지 않으면 글자가 끝난 뒤 한꺼번에 나온다.
+  location /api/ai/ {
+    set $ai_upstream ${AI_UPSTREAM};
+    proxy_pass $ai_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_buffering off;
+    proxy_read_timeout 120s;
+    include /etc/nginx/snippets/security-headers.conf;
+  }
+
+  # 같은 도메인에서 백엔드로 전달 → 프론트는 /api 상대 경로만 쓰고 CORS 가 필요 없다.
+  location /api/ {
+    set $api_upstream ${API_UPSTREAM};
+    proxy_pass $api_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    include /etc/nginx/snippets/security-headers.conf;
+  }
+
+  # 해시 파일명 자산은 장기 캐시 (내용이 바뀌면 파일명이 바뀐다)
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    include /etc/nginx/snippets/security-headers.conf;
+    try_files $uri =404;
+  }
+
+  # index.html 은 항상 최신인지 확인한다. 파일이 없으면 index.html 로 (Vue Router 가 URL 처리).
+  location / {
+    add_header Cache-Control "no-cache";
+    include /etc/nginx/snippets/security-headers.conf;
+    try_files $uri $uri/ /index.html;
+  }
+}
