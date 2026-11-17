@@ -1,5 +1,21 @@
 <script setup>
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { products } from '../data/products.js'
+import { formatPrice } from '../utils/format.js'
+
+// study4 실습 5: 검색어를 URL 쿼리(?q=)에 둔다. 새로고침하거나 주소를 공유해도 유지된다.
+const route = useRoute()
+const router = useRouter()
+const keyword = ref(String(route.query.q ?? ''))
+
+watch(keyword, (q) => {
+  router.replace({ query: q ? { q } : {} })
+})
+
+const filtered = computed(() =>
+  products.filter((p) => p.name.includes(keyword.value.trim())),
+)
 </script>
 
 <template>
@@ -10,12 +26,15 @@ import { products } from '../data/products.js'
       실제로 URL이 바뀌는지 주소창을 확인해보세요.
     </p>
 
-    <ul>
-      <li v-for="product in products" :key="product.id">
+    <input v-model="keyword" type="search" placeholder="상품명 검색" aria-label="상품명 검색" />
+
+    <p v-if="filtered.length === 0" class="empty">검색 결과가 없습니다.</p>
+    <ul v-else>
+      <li v-for="product in filtered" :key="product.id">
         <!-- RouterLink: <a> 태그를 대체, 새로고침 없이 라우팅만 바뀜 -->
         <RouterLink :to="`/products/${product.id}`" class="card">
           <h3>{{ product.name }}</h3>
-          <p>{{ product.price.toLocaleString() }}원</p>
+          <p>{{ formatPrice(product.price) }}</p>
         </RouterLink>
       </li>
     </ul>
@@ -30,6 +49,14 @@ import { products } from '../data/products.js'
 .desc {
   font-size: 0.9rem;
   color: #666;
+}
+
+input {
+  margin: 0.5rem 0;
+}
+
+.empty {
+  color: #999;
 }
 
 ul {
