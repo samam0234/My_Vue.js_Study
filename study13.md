@@ -3,7 +3,8 @@
 > 🎯 **목표**: Vue 프로젝트에서 많이 쓰는 UI·유틸 라이브러리(Tailwind CSS, VueUse, dayjs, axios, UI 컴포넌트 라이브러리)를 **필요한 만큼만** 연동하고, 도입 기준을 세운다.
 
 - 이전: [study12](./study12.md) 성능 최적화 (번들 크기가 도입 비용의 기준)
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다. 설치 전 각 패키지의 최신 문서에서 설정 방식을 확인하세요.
+- 구현 위치: `project/` — Tailwind(`@tailwindcss/vite`), VueUse(`stores/favorites.ts`), dayjs(`utils/format.ts`), `AppButton`·`FormField` 래퍼. **axios·Element Plus 는 도입하지 않았습니다**(아래 체크리스트 참고).
+- 설치 전 각 패키지의 최신 문서에서 설정 방식을 확인하세요.
 
 ---
 
@@ -237,6 +238,8 @@ defineProps({ loading: Boolean, variant: { type: String, default: 'primary' } })
 
 ## ⚠️ 오류 노트
 
+> 실제로 겪은 함정: Tailwind 플러그인을 `vite.config.ts` 에 넣었는데 유틸리티 CSS 가 하나도 만들어지지 않고 `@theme`/`@tailwind` 가 그대로 출력되며 minify 경고(`Unknown at rule`)가 떴다. 원인은 플러그인이 아니라 **낡은 `vite.config.js` 가 먼저 읽혀 `.ts` 설정이 통째로 무시된 것**이었다([study14](./study14.md)). 같은 증상이면 `ls vite.config.*` 부터 확인한다.
+
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | Tailwind 클래스가 적용 안 됨 | `@import "tailwindcss"` 누락 / 플러그인 미등록 | `main.css` 맨 위, `vite.config.js` 플러그인 확인 |
@@ -253,11 +256,11 @@ defineProps({ loading: Boolean, variant: { type: String, default: 'primary' } })
 ## ☐ 체크리스트
 
 - ☐ 도입 판단 기준 5가지를 말할 수 있다
-- ☐ Tailwind CSS 연동, 컴포넌트 하나를 클래스로 스타일링
-- ☐ VueUse `useLocalStorage`로 즐겨찾기 저장을 한 줄로 대체
-- ☐ dayjs로 `createdAt`을 "n시간 전"으로 표시
-- ☐ axios 인터셉터로 토큰 첨부·오류 변환 (또는 `fetch` 래퍼 유지 결정과 이유 기록)
-- ☐ UI 라이브러리를 하나 연동하고 `AppButton` 같은 래퍼로 감쌌다
+- ☑ Tailwind CSS 연동, 컴포넌트 하나를 클래스로 스타일링 — `vite.config.ts` 플러그인 + `main.css` 의 `@import "tailwindcss"`
+- ☑ VueUse `useLocalStorage`로 즐겨찾기 저장을 한 줄로 대체 — `stores/favorites.ts`
+- ☑ dayjs로 `createdAt`을 "n시간 전"으로 표시 — `PostCard`, `PostDetailView`, `CommentSection`
+- ☑ axios 인터셉터로 토큰 첨부·오류 변환 (또는 `fetch` 래퍼 유지 결정과 이유 기록) — **`fetch` 래퍼 유지로 결정** — 토큰 첨부·401 처리·오류 구조화는 `configureApi` 훅으로 충분하고 번들이 0이다. 타임아웃·업로드 진행률이 필요해지면 도입
+- ☐ UI 라이브러리를 하나 연동하고 `AppButton` 같은 래퍼로 감쌌다 — `AppButton`·`FormField` 래퍼는 Tailwind 로 구현했다. Element Plus 같은 컴포넌트 라이브러리 연동은 하지 않았다
 - ☐ 라이브러리 도입마다 번들 증가량을 측정해 기록했다
 
 ## ➡️ 다음 단계 연결
