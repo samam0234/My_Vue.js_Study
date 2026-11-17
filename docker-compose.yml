@@ -1,0 +1,33 @@
+# study17: 프론트(Nginx) + 백엔드 + AI 프록시를 한 번에 실행한다.
+#   docker compose up --build
+#   http://localhost:8080
+#
+# backend 는 "공통 API 스펙 v1"(/api/posts, /api/auth/* ...)을 구현한 서버 이미지로 바꿔 쓴다.
+# 비밀 값(DATABASE_URL, ANTHROPIC_API_KEY)은 이 파일에 쓰지 않고 .env 파일(커밋 금지)에서 주입한다.
+services:
+  web:
+    build:
+      context: ./project
+      args:
+        VITE_API_BASE_URL: "" # 같은 도메인의 /api 사용 (nginx 가 프록시)
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+      - ai-proxy
+
+  backend:
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE 에 공통 API 스펙 v1 을 구현한 이미지를 지정하세요}
+    environment:
+      CORS_ORIGIN: http://localhost:8080
+      DATABASE_URL: ${DATABASE_URL}
+    expose:
+      - "8000"
+
+  ai-proxy:
+    build: ./ai-proxy
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      BOARD_API_BASE: http://backend:8000
+    expose:
+      - "8787"

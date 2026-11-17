@@ -1,0 +1,89 @@
+# study15: push·PR 마다 린트 → 타입 검사 → 테스트(커버리지) → 빌드 → E2E 를 자동 실행한다.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: project # 저장소 루트가 아니라 project/ 에서 실행
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # package.json engines(^22.18) 에 맞춘다
+          cache: npm
+          cache-dependency-path: project/package-lock.json
+
+      - run: npm ci # lock 파일 기준 재현 가능한 설치
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm run test:coverage
+      - run: npm run build
+      # picomatch(<=4.0.7) ReDoS 권고(GHSA-fc5q-39xc-vjpf)는 패치 버전이 아직 없어 high 로 계속 보고된다.
+      # 빌드·개발 서버에서만 쓰이고 브라우저 번들에는 들어가지 않으므로 critical 만 차단한다.
+      # 패치가 나오면 --audit-level=high 로 되돌린다.
+      - run: npm audit --omit=dev --audit-level=critical
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: project/coverage
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: check # 빠른 검사가 통과한 뒤에만 느린 E2E 를 돌린다
+    defaults:
+      run:
+        working-directory: project
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: project/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          CI: true
+
+      - uses: actions/upload-artifact@v4
+        if: failure() # 실패했을 때만 리포트·트레이스를 받는다
+        with:
+          name: playwright-report
+          path: |
+            project/playwright-report
+            project/test-results
+
+  services:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [ai-proxy, board-mcp]
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+      - run: npm ci
+      - run: npm test

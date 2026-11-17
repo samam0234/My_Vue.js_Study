@@ -1,0 +1,85 @@
+# study17: master 에 push 되면 테스트 → Docker 이미지 빌드·GHCR push → (선택) 배포 훅 호출 → smoke test.
+# 배포 대상은 저장소 설정으로 켠다:
+#   Settings → Secrets and variables → Actions
+#     Variables: VITE_API_BASE_URL(선택), SITE_URL(smoke test 주소, 선택)
+#     Secrets:   DEPLOY_HOOK_URL(컨테이너 호스팅의 Deploy Hook, 선택)
+# 값이 없으면 해당 단계는 건너뛴다.
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: # 수동 실행
+
+permissions:
+  contents: read
+  packages: write # GHCR 에 push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: project
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: project/package-lock.json
+      - run: npm ci
+      - run: npm run ci # lint · type-check · test · build
+
+  image:
+    needs: test # 테스트가 실패하면 이미지를 만들지 않는다
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.name.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: name
+        # GHCR 이미지 이름은 소문자여야 한다
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/mini-board-web" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./project
+          push: true
+          tags: |
+            ${{ steps.name.outputs.image }}:${{ github.sha }}
+            ${{ steps.name.outputs.image }}:latest
+          build-args: |
+            VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: image
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: 배포 훅 호출
+        if: env.DEPLOY_HOOK_URL != ''
+        run: curl -fsS -X POST "$DEPLOY_HOOK_URL" # URL 자체가 비밀이므로 secrets 사용
+
+      - name: smoke test (/healthz, /, SPA fallback)
+        if: env.SITE_URL != ''
+        run: |
+          sleep 30 # 새 컨테이너가 뜰 시간
+          curl -fsS "$SITE_URL/healthz"
+          curl -fsSI "$SITE_URL/" | head -n 1
+          # /posts/1 이 404 가 아니라 200 이어야 SPA fallback 이 동작하는 것이다
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/posts/1")" = "200"
+          echo "배포 확인 완료. 롤백이 필요하면 이전 커밋 sha 태그 이미지로 다시 배포한다."
