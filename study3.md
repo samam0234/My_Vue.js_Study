@@ -200,7 +200,7 @@ cd demo && npm run dev
 - ☑ `computed`로 검색+필터 파생 목록을 만들었다 (`filteredPosts`)
 - ☑ `watch`로 검색어 변경을 감시했다
 - ☑ `onMounted`로 첫 fetch를 실행했다
-- ☐ 즐겨찾기를 `watch` + `localStorage`로 새로고침 후에도 유지 (실습 3)
+- ☑ 즐겨찾기를 `watch` + `localStorage`로 새로고침 후에도 유지 (실습 3) — `demo` PropsEmitPractice(watch+localStorage), `project` favorites 스토어(VueUse `useLocalStorage`)
 - ☐ `watchEffect`로 같은 기능을 구현해 보고 `watch`와의 차이를 한 줄로 정리
 
 ## ➡️ 다음 단계 연결
