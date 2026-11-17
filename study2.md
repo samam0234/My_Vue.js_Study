@@ -217,8 +217,8 @@ cd demo && npm run dev
 - ☑ `defineEmits` + `emit`으로 자식→부모 알림, 실제 변경은 부모가 수행
 - ☑ "자식은 props를 직접 바꾸지 않는다"를 설명할 수 있다
 - ☑ `project/`의 `PostCard`에서 `RouterLink` 안 버튼의 이동 방지를 이해
-- ☐ 실습 3: `StatusBadge.vue`(슬롯 + validator)를 직접 만들어 `demo/`에 붙이기
-- ☐ `defineModel()`로 `v-model`이 되는 `SearchInput.vue` 만들어 보기
+- ☑ 실습 3: `StatusBadge.vue`(슬롯 + validator)를 직접 만들어 `demo/`에 붙이기 — `demo/src/components/StatusBadge.vue`, 테스트 포함
+- ☑ `defineModel()`로 `v-model`이 되는 `SearchInput.vue` 만들어 보기 — `project/src/components/FormField.vue`·`Pagination.vue` 가 `defineModel` 로 구현
 
 ## ➡️ 다음 단계 연결
 
