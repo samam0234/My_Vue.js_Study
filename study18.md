@@ -3,7 +3,9 @@
 > 🎯 **목표**: Vue 앱에 AI 모델 API를 **안전하게**(키를 브라우저에 두지 않고) 연동해 게시글 요약·스트리밍 응답을 만들고, MCP(Model Context Protocol)의 기초를 익혀 게시판 API를 AI 도구에 연결해 본다.
 
 - 이전: [study17](./study17.md) Docker·배포 자동화
-- 이 문서의 코드는 **저장소에 아직 반영하지 않은 실습 예시**입니다. API 키는 직접 발급·보관해야 하며, SDK 사용법은 버전에 따라 달라질 수 있으니 공식 문서를 함께 확인하세요.
+- 구현 위치: [`ai-proxy/`](./ai-proxy)(Express 프록시, 테스트 7개), [`board-mcp/`](./board-mcp)(읽기 전용 MCP 서버, 스모크 테스트 3개), [`.mcp.json`](./.mcp.json), `project/src/{api/ai.ts, composables/useStreamSummary.ts, components/AiSummary.vue}`
+- 구현 메모: 프록시는 토큰 확인을 "헤더가 있는가"가 아니라 **백엔드 `/api/auth/me` 로 실제 검증**하고, 사용자별 분당 호출 제한(429)을 둡니다. 실제 AI API 를 호출하는 테스트는 하지 않았습니다(Anthropic 클라이언트는 가짜로 대체) — 키를 넣고 직접 확인하세요. 개발 중 Vue 는 같은 스펙의 **MSW 목 스트림**으로 동작합니다.
+- API 키는 직접 발급·보관해야 하며, SDK 사용법은 버전에 따라 달라질 수 있으니 공식 문서를 함께 확인하세요.
 
 ---
 
@@ -420,12 +422,12 @@ await server.connect(new StdioServerTransport())
 ## ☐ 체크리스트
 
 - ☐ "API 키를 브라우저에 두면 안 되는 이유"와 프록시 구조를 설명
-- ☐ 프록시 서버에 키를 환경변수로 두고 `/api/ai/summarize` 구현 (로그인·입력 제한 포함)
-- ☐ Vue에서 AI 요약 버튼(loading/error 상태 포함), 출력은 `{{ }}`로만
-- ☐ 스트리밍(SSE + `ReadableStream`)으로 글자가 차례로 표시되고 중지 가능
+- ☑ 프록시 서버에 키를 환경변수로 두고 `/api/ai/summarize` 구현 (로그인·입력 제한 포함) — `ai-proxy/app.js`·`server.js`
+- ☑ Vue에서 AI 요약 버튼(loading/error 상태 포함), 출력은 `{{ }}`로만 — `AiSummary.vue`
+- ☑ 스트리밍(SSE + `ReadableStream`)으로 글자가 차례로 표시되고 중지 가능 — `useStreamSummary.ts` (단위·E2E 테스트로 검증)
 - ☐ 프롬프트 인젝션 테스트 글로 방어 확인
 - ☐ MCP의 Tool / Resource / Prompt와 stdio 전송을 설명
-- ☐ 읽기 전용 MCP 서버(`search_posts`)를 만들고 AI 도구에 연결해 호출 확인
+- ☑ 읽기 전용 MCP 서버(`search_posts`)를 만들고 AI 도구에 연결해 호출 확인 — `board-mcp/server.js` (`search_posts`, `get_post`). 실제 MCP 클라이언트로 stdio 연결하는 스모크 테스트로 호출 검증, Claude Code 등에 연결하는 것은 직접 확인
 - ☐ 비용·안전 점검표 8개 항목 확인
 
 ## ➡️ 다음 단계 연결
