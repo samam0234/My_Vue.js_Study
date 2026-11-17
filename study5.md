@@ -206,9 +206,9 @@ cd project && npm run dev     # /login
 - ☑ `touched`/`submitted`로 오류 노출 시점 제어
 - ☑ `@submit.prevent`, `novalidate`, 중복 제출 방지(`:disabled`)
 - ☑ 로그인 폼(`LoginView.vue`)에 적용
-- ☐ 회원가입 폼 추가 + 비밀번호 확인 일치 검사
-- ☐ 서버 `error.fields`를 필드 아래에 표시 (실습 4, study6의 API 클라이언트 필요)
-- ☐ 게시글 작성 폼(제목 1~200자, 본문 필수) 검증 — [study6](./study6.md)의 작성·수정 화면에서 사용
+- ☑ 회원가입 폼 추가 + 비밀번호 확인 일치 검사 — `project/src/views/SignupView.vue`
+- ☑ 서버 `error.fields`를 필드 아래에 표시 (실습 4, study6의 API 클라이언트 필요) — `SignupView`, `PostFormView` (MSW 목 서버로 검증)
+- ☑ 게시글 작성 폼(제목 1~200자, 본문 필수) 검증 — [study6](./study6.md)의 작성·수정 화면에서 사용 — `project/src/views/PostFormView.vue`
 
 ## ➡️ 다음 단계 연결
 
