@@ -4,7 +4,7 @@
 
 - 이전: [study11](./study11.md) 상태·데이터 흐름
 - 원칙: **측정 → 가설 → 변경 1개 → 재측정.** 측정 없이 하는 최적화는 복잡도만 늘린다.
-- 구현 위치: [`project/vite.config.ts`](./project/vite.config.ts)(`build:analyze`, 벤더 청크 분리), `useDebounce`, 라우트 지연 로딩
+- 구현 위치: [`project/final/vite.config.ts`](./project/final/vite.config.ts)(`build:analyze`, 벤더 청크 분리), `useDebounce`, 라우트 지연 로딩
 - Lighthouse 는 아직 측정하지 않았습니다. 기록표의 빈 칸은 직접 측정해서 채웁니다.
 
 ---
