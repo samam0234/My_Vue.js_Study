@@ -22,7 +22,7 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
 RUN npm run build
 
 # ---------- 2단계: 실행 ----------
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 # 공식 nginx 이미지는 /etc/nginx/templates/*.template 의 ${ENV} 를 시작 시 치환해 conf.d 에 둔다.
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
