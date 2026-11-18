@@ -1,6 +1,6 @@
 # Mini Board (project)
 
-Vue 3 + TypeScript + Vite 로 만든 게시판 + 로그인 서비스입니다. 학습 문서: [../studyMidpoint.md](../studyMidpoint.md), [../studyFinal.md](../studyFinal.md). 전체 목차와 명령은 [../README.md](../README.md) 를 보세요.
+Vue 3 + TypeScript + Vite 로 만든 게시판 + 로그인 서비스입니다. 학습 문서: [../../studyMidpoint.md](../../studyMidpoint.md), [../../studyFinal.md](../../studyFinal.md). 전체 목차와 명령은 [../../README.md](../../README.md) 를 보세요.
 
 ## 시작하기
 

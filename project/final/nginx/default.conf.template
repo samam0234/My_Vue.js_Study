@@ -9,6 +9,8 @@ server {
   gzip_types text/css application/javascript application/json image/svg+xml;
 
   # Docker 내장 DNS. 백엔드 컨테이너가 나중에 떠도 요청 시점에 주소를 찾는다.
+  # 주의: 127.0.0.11 은 사용자 정의 네트워크(docker compose 가 만드는 네트워크)에서만 동작한다.
+  # 기본 bridge 네트워크로 `docker run` 하면 /api 가 502 가 된다. 이때는 --network 를 지정한다.
   resolver 127.0.0.11 valid=10s ipv6=off;
 
   include /etc/nginx/snippets/security-headers.conf;
@@ -43,8 +45,7 @@ server {
 
   # 해시 파일명 자산은 장기 캐시 (내용이 바뀌면 파일명이 바뀐다)
   location /assets/ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
+    add_header Cache-Control "public, max-age=31536000, immutable";
     include /etc/nginx/snippets/security-headers.conf;
     try_files $uri =404;
   }
