@@ -38,7 +38,7 @@ jobs:
       # 패치가 나오면 --audit-level=high 로 되돌린다.
       - run: npm audit --omit=dev --audit-level=critical
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: project/final/coverage
@@ -62,7 +62,7 @@ jobs:
         env:
           CI: true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure() # 실패했을 때만 리포트·트레이스를 받는다
         with:
           name: playwright-report
