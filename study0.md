@@ -3,7 +3,7 @@
 > 🎯 **목표**: Node.js와 Vue 3 + Vite 프로젝트를 만들고, `npm run dev`로 첫 화면이 뜨는 것까지 확인하며 핵심 용어를 익힌다.
 
 - 위치: 기초 구간 (study0~10)
-- 대응 코드: [`demo/`](./demo) (개별 실습 연습장), [`project/`](./project) (종합 미니 게시판)
+- 대응 코드: [`demo/`](./demo) (개별 실습 연습장), [`project/final/`](./project/final) (종합 미니 게시판)
 - 이 문서는 다른 프레임워크와 비교하지 않고 **Vue 하나만** 다룹니다.
 
 ---
@@ -161,7 +161,7 @@ p { color: #3b82f6; }
 | 폴더 | 역할 |
 |---|---|
 | `demo/` | 개념을 한 페이지에 계속 쌓는 **연습장** (Todo, 템플릿, ref/reactive, props/emit, Router, 폼, fetch, Pinia 로그인) |
-| `project/` | 연습장에서 익힌 것을 합쳐 만든 **미니 게시판** (JSONPlaceholder 사용) |
+| `project/final/` | 연습장에서 익힌 것을 합쳐 만든 **미니 게시판** (JSONPlaceholder 사용) |
 
 ### 7. 실행 확인 절차
 
@@ -191,7 +191,7 @@ p { color: #3b82f6; }
 - ☑ `npm run dev` 실행, 브라우저에서 첫 화면 확인
 - ☑ `main.js`가 하는 일(`createApp` → `use` → `mount`)을 설명할 수 있다
 - ☑ SFC의 세 블록(`script setup` / `template` / `style scoped`)을 구분할 수 있다
-- ☑ `demo/`(연습장)와 `project/`(종합)의 역할 차이를 설명할 수 있다
+- ☑ `demo/`(연습장)와 `project/final/`(종합)의 역할 차이를 설명할 수 있다
 - ☐ HMR이 동작하는 것을 직접 확인 (App.vue 수정 → 새로고침 없이 반영)
 
 ## ➡️ 다음 단계 연결
