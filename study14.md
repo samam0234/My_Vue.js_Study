@@ -4,7 +4,7 @@
 
 - 이전: [study13](./study13.md) 생태계 라이브러리
 - Notion 체크 항목: **TypeScript 도입**
-- 구현 위치: [`project/`](./project) 전체 — `tsconfig.json`, `env.d.ts`, `src/types/api.ts`, `eslint.config.js`, `.prettierrc.json`. `demo/` 는 study0~10 범위라 JS 로 유지합니다.
+- 구현 위치: [`project/final/`](./project/final) 전체 — `tsconfig.json`, `env.d.ts`, `src/types/api.ts`, `eslint.config.js`, `.prettierrc.json`. `demo/` 는 study0~10 범위라 JS 로 유지합니다.
 - 버전 메모: 이 저장소는 TypeScript 6, ESLint 10, vue-tsc 3 입니다. TypeScript 6 에서는 `baseUrl` 이 deprecated 라 `paths` 만 둡니다(아래 반영).
 
 ---
@@ -44,7 +44,7 @@ TypeScript는 코드를 **실행하기 전에** "이 객체에는 `nickName`이 
 ### 실습 1. 설치와 설정
 
 ```bash
-cd project
+cd project/final
 npm install -D typescript vue-tsc @types/node
 ```
 
@@ -348,8 +348,8 @@ ESLint는 "버그", Prettier는 "모양"을 맡는다. 둘이 규칙으로 충�
 
 - ☑ `typescript`, `vue-tsc`, `tsconfig.json`, `env.d.ts` 설정
 - ☑ `npm run type-check` 스크립트, `build`에 연결 — `"build": "npm run type-check && vite build"`
-- ☑ **TypeScript 도입 (Notion 체크 항목)**: `types/api.ts`로 API 응답 타입 정의 — `project/src/types/api.ts`
-- ☑ `api/*`, `stores/*`를 TS로 전환 — `project/` 전체가 TS (`.vue` 는 `<script setup lang="ts">`)
+- ☑ **TypeScript 도입 (Notion 체크 항목)**: `types/api.ts`로 API 응답 타입 정의 — `project/final/src/types/api.ts`
+- ☑ `api/*`, `stores/*`를 TS로 전환 — `project/final/` 전체가 TS (`.vue` 는 `<script setup lang="ts">`)
 - ☑ `defineProps<{}>()` / `defineEmits<{}>()` 타입 선언 적용
 - ☑ ESLint(flat config) + `npm run lint` 통과 — `eslint-plugin-vue` + `@vue/eslint-config-typescript` + prettier skip-formatting
 - ☑ Prettier + 저장 시 포맷 — `.prettierrc.json` (저장 시 포맷은 에디터 설정)
