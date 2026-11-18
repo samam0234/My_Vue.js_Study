@@ -3,7 +3,7 @@
 > 🎯 **목표**: Vue 프로젝트에서 많이 쓰는 UI·유틸 라이브러리(Tailwind CSS, VueUse, dayjs, axios, UI 컴포넌트 라이브러리)를 **필요한 만큼만** 연동하고, 도입 기준을 세운다.
 
 - 이전: [study12](./study12.md) 성능 최적화 (번들 크기가 도입 비용의 기준)
-- 구현 위치: `project/` — Tailwind(`@tailwindcss/vite`), VueUse(`stores/favorites.ts`), dayjs(`utils/format.ts`), `AppButton`·`FormField` 래퍼. **axios·Element Plus 는 도입하지 않았습니다**(아래 체크리스트 참고).
+- 구현 위치: `project/final/` — Tailwind(`@tailwindcss/vite`), VueUse(`stores/favorites.ts`), dayjs(`utils/format.ts`), `AppButton`·`FormField` 래퍼. **axios·Element Plus 는 도입하지 않았습니다**(아래 체크리스트 참고).
 - 설치 전 각 패키지의 최신 문서에서 설정 방식을 확인하세요.
 
 ---
