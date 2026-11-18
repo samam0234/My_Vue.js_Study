@@ -432,4 +432,4 @@ await server.connect(new StdioServerTransport())
 
 ## ➡️ 다음 단계 연결
 
-심화 구간의 모든 요소(상태·성능·라이브러리·타입·테스트·보안·Docker·AI)가 준비되었습니다. [final](./final.md)에서 midpoint 결과와 합쳐 **운영 가능한 서비스**로 완성합니다.
+심화 구간의 모든 요소(상태·성능·라이브러리·타입·테스트·보안·Docker·AI)가 준비되었습니다. [studyFinal](./studyFinal.md)에서 midpoint 결과와 합쳐 **운영 가능한 서비스**로 완성합니다.

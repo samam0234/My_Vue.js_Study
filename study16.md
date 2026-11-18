@@ -4,7 +4,7 @@
 
 - 이전: [study15](./study15.md) 고급 테스트·CI
 - 구현 위치: `project/src/{main.ts,utils/report.ts,utils/safeUrl.ts,components/ErrorBoundary.vue}`, `project/nginx/security-headers.conf`, `.github/dependabot.yml`
-- 점검 결과는 [final.md](./final.md) §3.2 에 기록했습니다. 모니터링은 Sentry 대신 의존성 없는 `sendBeacon` 보고(`VITE_ERROR_REPORT_URL`)로 구현했고, `reportError` 한 곳만 바꾸면 Sentry 로 교체됩니다.
+- 점검 결과는 [studyFinal.md](./studyFinal.md) §3.2 에 기록했습니다. 모니터링은 Sentry 대신 의존성 없는 `sendBeacon` 보고(`VITE_ERROR_REPORT_URL`)로 구현했고, `reportError` 한 곳만 바꾸면 Sentry 로 교체됩니다.
 
 ---
 

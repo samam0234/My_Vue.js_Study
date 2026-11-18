@@ -1,10 +1,10 @@
-# midpoint — 중간 응용: 게시판 + 로그인 서비스
+# studyMidpoint — 중간 응용: 게시판 + 로그인 서비스
 
 > 🎯 **목표**: study0~10에서 배운 Vue 기능**만으로** 실제 백엔드 API에 연결된 "게시판 + 로그인" 서비스를 처음부터 끝까지 완성한다.
 
 - 이전: [study10](./study10.md) 기초 구간 총정리
 - 다음: [study11](./study11.md) 심화 구간
-- 출발점: 이미 있는 [`project/`](./project) (JSONPlaceholder + 가상 로그인, [studyFinal.md](./studyFinal.md)에 정리)를 **실제 API 버전으로 승격**한다.
+- 출발점: 이미 있는 [`project/`](./project) (JSONPlaceholder + 가상 로그인, git 이력 `f0fdea4`의 옛 `studyFinal.md`에 정리)를 **실제 API 버전으로 승격**한다.
 - 새 라이브러리 금지 규칙: 사용 가능한 것은 `vue`, `vue-router`, `pinia`, `vite`, `vitest`, `@vue/test-utils`뿐. (axios, UI 라이브러리, TypeScript는 심화 구간에서)
 - 구현 위치: [`project/`](./project). 이 문서의 계획을 따라 만들었고, 이후 심화 구간(TypeScript·캐시·Tailwind 등)까지 함께 적용된 상태입니다. 백엔드가 없어서 **MSW 목 서버**가 API 를 대신합니다(`npm run dev`).
 

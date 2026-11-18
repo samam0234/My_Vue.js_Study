@@ -3,7 +3,7 @@
 > 🎯 **목표**: 프로젝트를 빌드해 정적 파일로 배포할 수 있게 만들고, study0~10 전체를 복습 문제로 정리한다.
 
 - 이전: [study9](./study9.md) 테스트·디버깅
-- 다음: [midpoint](./midpoint.md) — study0~10만으로 게시판+로그인 완성
+- 다음: [studyMidpoint](./studyMidpoint.md) — study0~10만으로 게시판+로그인 완성
 - 구현 위치: `demo/`·`project/` 의 `public/_redirects`, `vercel.json`, `vite.config` 의 `base`(`BASE_PATH`)
 
 ---
@@ -213,4 +213,4 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 
 ## ➡️ 다음 단계 연결
 
-기초 구간 끝. [midpoint](./midpoint.md)에서 **지금까지 배운 것만으로** 게시판 + 로그인 서비스를 처음부터 끝까지 완성합니다.
+기초 구간 끝. [studyMidpoint](./studyMidpoint.md)에서 **지금까지 배운 것만으로** 게시판 + 로그인 서비스를 처음부터 끝까지 완성합니다.

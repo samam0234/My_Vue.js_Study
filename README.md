@@ -28,7 +28,7 @@ Vue 3 + Vite로 **환경 설정 → 기초 문법 → 미니 서비스 → 운�
 
 | 문서 | 내용 |
 |---|---|
-| [midpoint](./midpoint.md) | study0~10 범위만으로 **게시판 + 로그인** 서비스 완성 (목표 · 기능 목록 · 폴더 구조 · 구현 순서 · 완성 체크리스트 · 회고) |
+| [studyMidpoint](./studyMidpoint.md) | study0~10 범위만으로 **게시판 + 로그인** 서비스 완성 (목표 · 기능 목록 · 폴더 구조 · 구현 순서 · 완성 체크리스트 · 회고) |
 
 ### 후반 심화 구간 (study11~18)
 
@@ -47,9 +47,9 @@ Vue 3 + Vite로 **환경 설정 → 기초 문법 → 미니 서비스 → 운�
 
 | 문서 | 내용 |
 |---|---|
-| [final](./final.md) | midpoint + study11~18을 합쳐 **운영 가능한 서비스** 완성 (목표 · 기능 확장 · 성능·보안 점검 · Docker·외부 배포 · 테스트 결과 · 최종 회고) |
+| [studyFinal](./studyFinal.md) | midpoint + study11~18을 합쳐 **운영 가능한 서비스** 완성 (목표 · 기능 확장 · 성능·보안 점검 · Docker·외부 배포 · 테스트 결과 · 최종 회고) |
 
-> [studyFinal.md](./studyFinal.md)는 JSONPlaceholder 기반으로 만든 **첫 종합 실습(`project/`) 기록**으로, midpoint 이전의 출발점입니다.
+> 옛 `studyFinal.md`(JSONPlaceholder 기반 첫 종합 실습 기록)는 현재 `studyMidpoint.md`·`studyFinal.md`로 대체되었고, 원본은 git 이력(`f0fdea4`)에 있습니다.
 
 ## 프로젝트 구조
 
@@ -57,10 +57,9 @@ Vue 3 + Vite로 **환경 설정 → 기초 문법 → 미니 서비스 → 운�
 vue.js/
 ├─ README.md                  # 이 문서
 ├─ study0.md ~ study10.md     # 기초 구간
-├─ midpoint.md                # 중간 응용
+├─ studyMidpoint.md           # 중간 응용
 ├─ study11.md ~ study18.md    # 후반 심화 구간
-├─ final.md                   # 심화 응용 (실측 기록표 포함)
-├─ studyFinal.md              # 첫 종합 실습 기록 (JSONPlaceholder 미니 게시판)
+├─ studyFinal.md              # 심화 응용 (실측 기록표 포함)
 ├─ demo/                      # study0~10 개념별 실습 연습장 (JS, Vue 3 + Vite, Vitest)
 ├─ project/                   # Mini Board — midpoint + final 구현 (TypeScript, Tailwind, Vitest, Playwright, Docker)
 │  ├─ src/{api,mocks,stores,composables,components,views,router,utils,config,types,test}
@@ -121,10 +120,10 @@ cd board-mcp && npm test
 |---|---|
 | study0~7 | `demo/` 개념별 실습 + `project/` 구현 완료 |
 | study8~10 | `demo/`(환경변수·composable·Vitest·SPA fallback), `project/` 구현 완료 |
-| midpoint | `project/` 의 기능 F1~F9 구현, 테스트 통과 |
+| studyMidpoint | `project/` 의 기능 F1~F9 구현, 테스트 통과 |
 | study11~16, 18 | `project/`, `ai-proxy/`, `board-mcp/` 구현·테스트 통과 (실제 AI API 호출만 미검증) |
 | study17 | `Dockerfile`·`nginx/`·`docker-compose.yml`·`deploy.yml` **작성 완료, 아직 실행하지 않음**(Docker 데몬·GitHub Actions 첫 실행 전) |
-| final | 실측 기록표 작성. Lighthouse·컨테이너 실행·실제 배포는 미측정/미실행 |
+| studyFinal | 실측 기록표 작성. Lighthouse·컨테이너 실행·실제 배포는 미측정/미실행 |
 
 - 문서의 `☑` 는 코드로 구현하고 확인한 항목, `☐` 는 아직 하지 않았거나 학습자가 직접 해 보는 항목(설명하기, 수동 확인, 실제 배포 등)입니다.
 - 백엔드가 없어서 API 는 **MSW 목 서버**(`project/src/mocks/`)가 대신하고, 단위·통합·E2E 가 같은 핸들러를 공유합니다. 백엔드 연동은 **「공통 API 스펙 v1」**(`/api/posts`, `/api/auth/*`, `{ data }` / `{ error }` 응답 형식)을 따르는 서버를 전제로 합니다.
@@ -143,7 +142,7 @@ cd board-mcp && npm test
 | study5 (폼 검증) | study5 |
 | study6 (fetch) | study6 |
 | study7 (Pinia 로그인) | study7 |
-| studyFinal (미니 게시판) | studyFinal(유지), midpoint·final의 출발점 |
+| studyFinal (JSONPlaceholder 미니 게시판) | studyMidpoint·studyFinal 의 출발점 (원본은 git 이력 `f0fdea4`) |
 
 ## 작업 규칙
 
