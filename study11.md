@@ -3,7 +3,7 @@
 > 🎯 **목표**: Pinia를 구조적으로 쓰고, 요청 캐시·중복 제거·취소·경쟁 상태 방지 같은 **비동기 데이터 흐름**을 직접 구현한다.
 
 - 이전: [studyMidpoint](./studyMidpoint.md) (한계: 캐시 없음, 경쟁 상태)
-- 구현 위치: [`project/src/api/cache.ts`](./project/src/api/cache.ts), [`composables/useLatestRequest.ts`](./project/src/composables/useLatestRequest.ts), [`components/CommentSection.vue`](./project/src/components/CommentSection.vue)(낙관적 업데이트), [`views/PostListView.vue`](./project/src/views/PostListView.vue)
+- 구현 위치: [`project/final/src/api/cache.ts`](./project/final/src/api/cache.ts), [`composables/useLatestRequest.ts`](./project/final/src/composables/useLatestRequest.ts), [`components/CommentSection.vue`](./project/final/src/components/CommentSection.vue)(낙관적 업데이트), [`views/PostListView.vue`](./project/final/src/views/PostListView.vue)
 - 구현 메모: 캐시는 `signal` 을 함께 받아 **취소된 진행 중 요청을 다른 호출이 재사용하지 않게** 했습니다(같은 키로 이전 요청을 취소하고 곧바로 다시 부르면 취소된 Promise 를 받는 경합이 생김). 취소 판별은 `instanceof DOMException` 이 아니라 `err.name` 으로 합니다.
 
 ---
