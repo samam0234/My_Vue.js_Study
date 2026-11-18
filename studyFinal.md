@@ -5,7 +5,8 @@
 - 이전: [study18](./study18.md) AI 연동·MCP, [studyMidpoint](./studyMidpoint.md)
 - 참고(옛 버전): JSONPlaceholder 기반의 첫 종합 실습 기록은 git 이력(`f0fdea4`의 `studyFinal.md`)에 있습니다.
 - 이 문서는 **완성 계획과 검증 기록표**입니다. 구현·실행해서 확인한 것만 `☑`/값으로 채웠고, 아직 하지 않은 항목은 `☐`, 값은 `____` 로 남겼습니다(Lighthouse 측정, Docker 빌드·실행, GitHub Actions 첫 실행, 실제 배포).
-- 구현 위치: [`project/`](./project)(프론트), [`ai-proxy/`](./ai-proxy), [`board-mcp/`](./board-mcp), [`docker-compose.yml`](./docker-compose.yml), [`.github/`](./.github), [`.mcp.json`](./.mcp.json). 백엔드가 없어서 개발·테스트·E2E 는 **MSW 목 서버**(공통 API 스펙 v1)로 진행했습니다.
+- 출발점: [studyMidpoint](./studyMidpoint.md) 의 [`project/midpoint/`](./project/midpoint) 를 TypeScript 로 옮기고 심화 기능을 더한 것이 [`project/final/`](./project/final) 입니다.
+- 구현 위치: [`project/final/`](./project/final)(프론트), [`ai-proxy/`](./ai-proxy), [`board-mcp/`](./board-mcp), [`docker-compose.yml`](./docker-compose.yml), [`.github/`](./.github), [`.mcp.json`](./.mcp.json). 백엔드가 없어서 개발·테스트·E2E 는 **MSW 목 서버**(공통 API 스펙 v1)로 진행했습니다.
 
 ---
 
@@ -75,7 +76,7 @@ frontend_study/vue.js/
 ├─ .github/workflows/
 │  ├─ ci.yml                  # study15
 │  └─ deploy.yml              # study17
-├─ project/
+├─ project/final/
 │  ├─ Dockerfile · nginx.conf · .dockerignore
 │  ├─ .env.example · .env.development · .env.production
 │  ├─ eslint.config.js · .prettierrc.json · tsconfig.json · env.d.ts
@@ -156,7 +157,7 @@ frontend_study/vue.js/
 - ☑ vendor 분리(`rolldownOptions.output.codeSplitting`), `npm run build:analyze` 로 `dist/stats.html` 생성
 - ☑ 검색 디바운스 + 요청 취소
 - ☐ 이미지에 `width`/`height`/`loading="lazy"`
-- ☑ Nginx gzip, 해시 자산 `immutable`, `index.html` `no-cache` — `project/nginx/default.conf.template` 작성(컨테이너 실행 검증 전)
+- ☑ Nginx gzip, 해시 자산 `immutable`, `index.html` `no-cache` — `project/final/nginx/default.conf.template` 작성(컨테이너 실행 검증 전)
 - ☐ 라이브러리 도입(Tailwind·UI·dayjs 등)마다 번들 증가량을 기록하고 정당화 — 도입 전/후 크기를 따로 재지 않았다. 현재 CSS 15.8KB(gzip 4.1KB)
 - ☐ **효과가 숫자로 확인된 최적화만** 유지
 
@@ -168,11 +169,11 @@ frontend_study/vue.js/
 | 2 | 사용자 입력 URL (`safeHref`) | 코드 점검 | ☑ `utils/safeUrl.ts` + 테스트. 현재 사용자 URL 을 렌더링하는 곳은 없음 |
 | 3 | `npm audit --omit=dev` high/critical 0 | 실행 | 🟡 critical 0, **high 8**(모두 picomatch ReDoS `GHSA-fc5q-39xc-vjpf` 하나에서 파생, 패치 버전 없음, 빌드·개발 서버 쪽 의존성). CI 는 critical 만 차단 |
 | 4 | 비밀이 `VITE_`·`.env.production`·번들·git에 없음 | `grep -r "sk-" dist/`, 파일 점검 | ☑ 운영 `dist/` 에 `sk-ant`·`password123`·`mock-token` 없음 (개발용 계정은 `VITE_ENABLE_MOCK` 로 제거) |
-| 5 | 보안 헤더(CSP, nosniff, frame-ancestors, Referrer-Policy) | `curl -I https://도메인` | ☐ `nginx/security-headers.conf` 작성, **실제 응답 확인 전** |
+| 5 | 보안 헤더(CSP, nosniff, frame-ancestors, Referrer-Policy) | `curl -I https://도메인` | ☑ 컨테이너(`docker run`)에서 `curl -I` 로 4개 헤더 확인 (실제 도메인 배포 후 재확인 필요) |
 | 6 | 토큰 보관 위험(XSS) 인지, 만료 처리(401) | 시나리오 | ☑ 401 → 세션 정리(통합 테스트), 위조 토큰 → 새로고침 시 정리(E2E). `localStorage` 보관 위험은 문서화 |
 | 7 | AI 프록시: 로그인 필수·입력 제한·`max_tokens`·rate limit | 코드·요청 테스트 | ☑ `ai-proxy/app.test.js` 7개 (401·400·인젝션 격리·502 은닉·429·SSE) |
 | 8 | 오류·로그에 토큰/개인정보 없음 | 오류 보고 payload 점검 | ☑ `report.ts` 는 메시지·스택·`requestId`·경로만 전송 (쿼리스트링·토큰 제외) |
-| 9 | 컨테이너 이미지에 `.env.local`·비밀 없음 | `docker history`, `.dockerignore` | ☐ `.dockerignore` 로 제외하도록 작성, **이미지 확인 전** |
+| 9 | 컨테이너 이미지에 `.env.local`·비밀 없음 | `docker history`, `.dockerignore` | ☑ `.dockerignore` 로 제외, 최종 이미지는 `dist/` 와 nginx 설정만 포함 (멀티 스테이지) |
 | 10 | 의존성 자동 업데이트(Dependabot) | 설정 확인 | ☑ `.github/dependabot.yml` (npm 3곳·docker·actions) |
 
 ### 3.3 운영 안정성 점검 (장애 주입)
@@ -193,8 +194,8 @@ frontend_study/vue.js/
 
 ### 4.1 산출물
 
-- ☐ `project/Dockerfile` (멀티 스테이지: node 빌드 → nginx 실행)
-- ☐ `project/nginx.conf` (SPA fallback, `/healthz`, 캐시 정책, 보안 헤더, 선택: `/api` 프록시)
+- ☐ `project/final/Dockerfile` (멀티 스테이지: node 빌드 → nginx 실행)
+- ☐ `project/final/nginx.conf` (SPA fallback, `/healthz`, 캐시 정책, 보안 헤더, 선택: `/api` 프록시)
 - ☐ `.dockerignore`
 - ☐ `docker-compose.yml` (web + backend [+ ai-proxy])
 - ☐ `.github/workflows/ci.yml`, `deploy.yml`
@@ -221,8 +222,8 @@ push (master)
 
 ### 4.4 배포 점검표
 
-- ☐ `docker build`/`run` 로컬 성공, 이미지 크기 기록: ____ MB — Dockerfile·nginx 설정은 작성했지만 이 환경에서 Docker 데몬이 꺼져 있어 **실행하지 못함**
-- ☐ `docker compose up`으로 프론트·백엔드 연동, `/posts/1` 새로고침 OK
+- ☑ `docker build`/`run` 로컬 성공, 이미지 크기 **73.9MB** (`/healthz`·SPA fallback·보안 헤더·gzip·`immutable` 캐시·healthcheck 확인)
+- ☑ `docker compose up`으로 프론트·백엔드 연동, `/posts/1` 새로고침 OK — web + `backend-django` + ai-proxy 전체 기동, `/healthz`·SPA fallback·`/api` 프록시·로그인·`/me`·AI 프록시 401/400 확인(실제 AI 호출은 키가 없어 미실시)
 - ☐ Actions에서 `test → image → deploy` 초록, 레지스트리에 `:sha` 태그 — `ci.yml`·`deploy.yml` 작성 및 YAML 문법 확인 완료, GitHub 에서의 첫 실행 전
 - ☐ 배포 URL 접속, 로그인·작성·AI 요약 동작
 - ☑ smoke test 자동화(`deploy.yml`, `SITE_URL` 설정 시 실행), 롤백 절차 문서화(이전 sha 태그로 재배포)
