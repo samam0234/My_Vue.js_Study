@@ -3,8 +3,8 @@
 > 🎯 **목표**: Vue 앱을 멀티 스테이지 Dockerfile로 **Nginx 이미지**로 묶고, GitHub Actions가 이미지를 빌드·푸시한 뒤 외부 서비스에 **자동 배포**하는 과정을 만든다.
 
 - 이전: [study16](./study16.md) 보안·운영 (보안 헤더, SPA fallback을 Nginx 설정에 담는다)
-- 구현 위치: [`project/Dockerfile`](./project/Dockerfile), [`project/nginx/`](./project/nginx)(`default.conf.template`·`security-headers.conf`), [`project/.dockerignore`](./project/.dockerignore), [`docker-compose.yml`](./docker-compose.yml), [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
-- **실행 검증 전**: 이 환경에서는 Docker 데몬을 띄우지 못해 `docker build`/`run` 은 실행하지 못했습니다(YAML 문법과 `npm run ci` 는 확인). 직접 `docker build` 해서 확인하세요. 배포 대상 서비스는 선택이며, 실제 배포 전에는 계정·비밀 값 설정을 직접 확인하세요.
+- 구현 위치: [`project/final/Dockerfile`](./project/final/Dockerfile), [`project/final/nginx/`](./project/final/nginx)(`default.conf.template`·`security-headers.conf`), [`project/final/.dockerignore`](./project/final/.dockerignore), [`docker-compose.yml`](./docker-compose.yml), [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+- **실행 검증**: `docker build` 성공(이미지 73.9MB), `docker run` 으로 `/healthz`·SPA fallback(`/posts/1` 200)·보안 헤더·gzip·해시 자산 장기 캐시·healthcheck `healthy`·`nginx -t` 를 확인했습니다. `/api` 프록시는 개발 API 서버(`project/midpoint`)를 백엔드로 두고 로그인·`/me`까지 통과했습니다. `docker compose up --build`(web + Django 백엔드 + ai-proxy) 전체 스택도 실행해 `/api` 프록시·로그인·SPA fallback·AI 프록시 인증을 확인했습니다. GitHub Actions 는 아직 실행하지 않았습니다. 배포 대상 서비스는 선택이며, 실제 배포 전에는 계정·비밀 값 설정을 직접 확인하세요.
 - 아래 `nginx.conf` 예시와 달리 실제 구현은 **nginx 공식 이미지의 템플릿 기능**(`/etc/nginx/templates/*.template` 의 `${API_UPSTREAM}` 치환)을 쓰고, 보안 헤더는 `include` 파일로 분리해 모든 `location` 에 반복합니다(`add_header` 상속 문제 해결).
 
 ---
@@ -64,7 +64,7 @@ git push (master) ─▶ GitHub Actions
 ### 실습 1. `Dockerfile` (멀티 스테이지)
 
 ```dockerfile
-# project/Dockerfile
+# project/final/Dockerfile
 
 # ---------- 1단계: 빌드 ----------
 FROM node:22-alpine AS build
@@ -104,7 +104,7 @@ HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1/healthz |
 ### 실습 2. `nginx.conf` — SPA fallback + 캐시 + 보안 헤더 + (선택) API 프록시
 
 ```nginx
-# project/nginx.conf
+# project/final/nginx.conf
 server {
   listen 80;
   server_name _;
@@ -166,7 +166,7 @@ playwright-report
 ### 실습 4. 로컬 빌드·실행
 
 ```bash
-cd project
+cd project/final
 docker build -t mini-board-web:local --build-arg VITE_API_BASE_URL=https://api.example.com .
 docker run --rm -p 8080:80 mini-board-web:local
 # http://localhost:8080  — /posts/1 직접 접속·새로고침이 되는지 확인
@@ -181,11 +181,11 @@ curl -I http://localhost:8080/           # 보안 헤더 확인
 ### 실습 5. docker compose — 프론트 + 백엔드 함께
 
 ```yaml
-# docker-compose.yml (저장소 루트 또는 project/)
+# docker-compose.yml (저장소 루트 또는 project/final/)
 services:
   web:
     build:
-      context: ./project
+      context: ./project/final
       args:
         VITE_API_BASE_URL: ""            # 같은 도메인의 /api 사용 (nginx 프록시)
     ports:
@@ -229,11 +229,11 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: project } }
+    defaults: { run: { working-directory: project/final } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: project/package-lock.json }
+        with: { node-version: 22, cache: npm, cache-dependency-path: project/final/package-lock.json }
       - run: npm ci
       - run: npm run ci                  # study15: lint · type-check · test · build
 
@@ -253,7 +253,7 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          context: ./project
+          context: ./project/final
           push: true
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
@@ -292,11 +292,11 @@ jobs:
   deploy-static:
     needs: test
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: project } }
+    defaults: { run: { working-directory: project/final } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: project/package-lock.json }
+        with: { node-version: 22, cache: npm, cache-dependency-path: project/final/package-lock.json }
       - run: npm ci
       - run: npm run build
         env:
@@ -339,6 +339,7 @@ Actions의 마지막 단계에 위 `curl`을 넣어 **배포가 살아 있는지
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
+| `docker run` 한 컨테이너에서 `/api` 가 502 (`could not be resolved`) | nginx 의 `resolver 127.0.0.11` 은 **사용자 정의 네트워크**에서만 동작한다 (기본 bridge 에는 없음) | `docker network create` 후 `--network` 지정, 또는 docker compose 사용 |
 | 컨테이너에서 `/posts/1` 새로고침 404 | `try_files ... /index.html` 누락 | `nginx.conf`의 `location /` 확인 |
 | 컨테이너 실행 후 API가 개발용 주소로 감 | `VITE_*`가 빌드 시 안 들어감 | `--build-arg`/`ARG`+`ENV` 확인, 런타임 `-e`는 무효 |
 | `npm ci` 실패: lock 불일치 | `package-lock.json` 미동기화 | 로컬에서 `npm install` 후 lock 커밋 |
@@ -357,7 +358,7 @@ Actions의 마지막 단계에 위 `curl`을 넣어 **배포가 살아 있는지
 ## ☐ 체크리스트
 
 - ☑ 멀티 스테이지 `Dockerfile` + `nginx.conf` + `.dockerignore` 작성 — 작성 완료(미실행)
-- ☐ `docker build` / `docker run`으로 로컬 확인, SPA fallback·보안 헤더 확인
+- ☑ `docker build` / `docker run`으로 로컬 확인, SPA fallback·보안 헤더 확인 — 빌드·실행·헤더·fallback 확인 완료
 - ☐ 레이어 캐시(의존성 먼저 복사)로 재빌드 속도 개선 확인
 - ☐ `VITE_*`가 "빌드 시점" 값이라는 것과 해결 방법 2가지를 설명
 - ☑ compose로 프론트 + 백엔드를 함께 실행 (또는 Nginx `/api` 프록시 설계) — `docker-compose.yml` + Nginx `/api`·`/api/ai` 프록시 (미실행)
