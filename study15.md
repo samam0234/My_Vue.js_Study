@@ -4,7 +4,7 @@
 
 - 이전: [study14](./study14.md) 타입·정적 분석
 - 기초 테스트는 [study9](./study9.md) — 여기서는 그 위에 **통합·E2E·커버리지·CI**를 쌓는다.
-- 구현 위치: [`project/src/**/*.spec.ts`](./project/src), [`project/src/mocks/`](./project/src/mocks)(MSW 핸들러·메모리 DB), [`project/e2e/board.spec.ts`](./project/e2e/board.spec.ts), [`project/playwright.config.ts`](./project/playwright.config.ts), [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
+- 구현 위치: [`project/final/src/**/*.spec.ts`](./project/final/src), [`project/final/src/mocks/`](./project/final/src/mocks)(MSW 핸들러·메모리 DB), [`project/final/e2e/board.spec.ts`](./project/final/e2e/board.spec.ts), [`project/final/playwright.config.ts`](./project/final/playwright.config.ts), [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
 - 실측: 단위·통합 94개 통과(분기 커버리지 약 81%), E2E 19개 통과(약 13초). 구현 메모: 이 저장소의 E2E 는 `page.route` 대신 **MSW 목 서버를 켠 빌드(`vite build --mode e2e`)** 를 대상으로 해서 단위·통합·E2E 가 같은 가짜 서버(`handlers.ts`)를 공유합니다.
 
 ---
@@ -250,7 +250,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: project           # 저장소 루트가 아니라 project/ 에서 실행
+        working-directory: project/final           # 저장소 루트가 아니라 project/final/ 에서 실행
     steps:
       - uses: actions/checkout@v4
 
@@ -258,7 +258,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: project/package-lock.json
+          cache-dependency-path: project/final/package-lock.json
 
       - run: npm ci                          # lock 파일 기준으로 정확히 설치
       - run: npm run lint
@@ -269,18 +269,18 @@ jobs:
       - uses: actions/upload-artifact@v4     # 커버리지 보고서 보관
         with:
           name: coverage
-          path: project/coverage
+          path: project/final/coverage
 
   e2e:
     runs-on: ubuntu-latest
     needs: check                              # check가 성공해야 실행
     defaults:
       run:
-        working-directory: project
+        working-directory: project/final
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: project/package-lock.json }
+        with: { node-version: 22, cache: npm, cache-dependency-path: project/final/package-lock.json }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
@@ -289,13 +289,13 @@ jobs:
         if: failure()                         # 실패했을 때만 리포트 업로드
         with:
           name: playwright-report
-          path: project/playwright-report
+          path: project/final/playwright-report
 ```
 
 | 줄 | 설명 |
 |---|---|
 | `on.push.branches` / `pull_request` | master push와 모든 PR에서 실행 |
-| `working-directory: project` | 이 저장소는 루트가 아니라 하위 폴더가 앱 |
+| `working-directory: project/final` | 이 저장소는 루트가 아니라 하위 폴더가 앱 |
 | Node 22 | `package.json`의 `engines`(^22.18) 요구에 맞춤 |
 | `npm ci` | `package-lock.json`대로 재현 가능한 설치 (`npm install`은 lock을 바꿀 수 있음) |
 | `cache: npm` | 의존성 캐시로 실행 시간 단축 |
@@ -329,7 +329,7 @@ jobs:
 | Playwright: 로컬은 통과, CI는 실패 | 브라우저 미설치 / 타이밍 | `playwright install --with-deps`, `sleep` 대신 auto-wait 단언, 재시도 설정 |
 | E2E가 가끔 실패(flaky) | 고정 대기, 외부 서버 의존 | 네트워크 가로채기, 안정적인 선택자(`getByRole`) |
 | Actions: `npm ci` 실패 `package.json and package-lock.json are not in sync` | lock 파일 미갱신 | 로컬에서 `npm install` 후 lock 커밋 |
-| Actions: `ENOENT package.json` | 작업 폴더 틀림 | `working-directory: project` |
+| Actions: `ENOENT package.json` | 작업 폴더 틀림 | `working-directory: project/final` |
 | 커버리지가 낮은데도 통과 | 임계값 없음 | `coverage.thresholds`로 최소치 설정(점진적으로 올림) |
 | CI가 너무 느림 | 매번 전체 E2E | PR에는 핵심 E2E만, 전체는 야간/배포 전 |
 
