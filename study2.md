@@ -3,7 +3,7 @@
 > 🎯 **목표**: Vue의 기본 단위인 **컴포넌트**를 직접 만들고, `props`(부모→자식)와 `emit`(자식→부모)으로 데이터를 주고받는다.
 
 - 이전: [study1](./study1.md) 기본 문법
-- 대응 코드: [`demo/src/components/ProductCard.vue`](./demo/src/components/ProductCard.vue), [`PropsEmitPractice.vue`](./demo/src/components/PropsEmitPractice.vue), [`project/src/components/PostCard.vue`](./project/src/components/PostCard.vue)
+- 대응 코드: [`demo/src/components/ProductCard.vue`](./demo/src/components/ProductCard.vue), [`PropsEmitPractice.vue`](./demo/src/components/PropsEmitPractice.vue), [`project/final/src/components/PostCard.vue`](./project/final/src/components/PostCard.vue)
 
 ---
 
@@ -165,7 +165,7 @@ defineProps({
 - `<slot>`: 부모가 태그 사이에 넣은 내용이 들어가는 자리. 안의 글자는 기본값.
 - `validator`: 허용되지 않은 값을 넣으면 개발 모드에서 경고.
 
-### 실습 4. 종합 프로젝트에서의 쓰임 — `project/` PostCard
+### 실습 4. 종합 프로젝트에서의 쓰임 — `project/final/` PostCard
 
 `PostCard.vue`는 카드 전체가 `<RouterLink>`라서 클릭하면 상세로 이동합니다. 안의 즐겨찾기 버튼만 이동을 막고 `emit`으로 부모에게 알립니다.
 
@@ -216,9 +216,9 @@ cd demo && npm run dev
 - ☑ `defineProps`로 타입·필수·기본값을 선언
 - ☑ `defineEmits` + `emit`으로 자식→부모 알림, 실제 변경은 부모가 수행
 - ☑ "자식은 props를 직접 바꾸지 않는다"를 설명할 수 있다
-- ☑ `project/`의 `PostCard`에서 `RouterLink` 안 버튼의 이동 방지를 이해
+- ☑ `project/final/`의 `PostCard`에서 `RouterLink` 안 버튼의 이동 방지를 이해
 - ☑ 실습 3: `StatusBadge.vue`(슬롯 + validator)를 직접 만들어 `demo/`에 붙이기 — `demo/src/components/StatusBadge.vue`, 테스트 포함
-- ☑ `defineModel()`로 `v-model`이 되는 `SearchInput.vue` 만들어 보기 — `project/src/components/FormField.vue`·`Pagination.vue` 가 `defineModel` 로 구현
+- ☑ `defineModel()`로 `v-model`이 되는 `SearchInput.vue` 만들어 보기 — `project/final/src/components/FormField.vue`·`Pagination.vue` 가 `defineModel` 로 구현
 
 ## ➡️ 다음 단계 연결
 
