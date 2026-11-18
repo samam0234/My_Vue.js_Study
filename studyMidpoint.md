@@ -4,9 +4,9 @@
 
 - 이전: [study10](./study10.md) 기초 구간 총정리
 - 다음: [study11](./study11.md) 심화 구간
-- 출발점: 이미 있는 [`project/`](./project) (JSONPlaceholder + 가상 로그인, git 이력 `f0fdea4`의 옛 `studyFinal.md`에 정리)를 **실제 API 버전으로 승격**한다.
+- 출발점: 이미 있는 [`project/midpoint/`](./project/midpoint) (JSONPlaceholder + 가상 로그인, git 이력 `f0fdea4`의 옛 `studyFinal.md`에 정리)를 **실제 API 버전으로 승격**한다.
 - 새 라이브러리 금지 규칙: 사용 가능한 것은 `vue`, `vue-router`, `pinia`, `vite`, `vitest`, `@vue/test-utils`뿐. (axios, UI 라이브러리, TypeScript는 심화 구간에서)
-- 구현 위치: [`project/`](./project). 이 문서의 계획을 따라 만들었고, 이후 심화 구간(TypeScript·캐시·Tailwind 등)까지 함께 적용된 상태입니다. 백엔드가 없어서 **MSW 목 서버**가 API 를 대신합니다(`npm run dev`).
+- 구현 위치: [`project/midpoint/`](./project/midpoint) — 이 문서의 계획을 study0~10 범위(JS, 일반 CSS, 새 라이브러리 없음)로만 구현했습니다. 백엔드가 없어서 공통 API 스펙 v1 을 구현한 **개발 API 서버**(`npm run api`)를 같이 두었고, 테스트는 그 서버를 실제로 띄워 진행합니다(42개 통과). 실제 백엔드로는 Django 서버 [`backend-django/`](./backend-django)에도 코드 수정 없이 붙으며(Vite 프록시·CORS 직접 호출 모두 브라우저 시나리오로 확인) 심화 기능은 [`project/final/`](./project/final)에 있습니다.
 
 ---
 
@@ -65,7 +65,7 @@
 ## 3. 폴더 구조
 
 ```
-project/
+project/midpoint/
 ├─ .env.example
 ├─ .env.development
 ├─ .env.production
