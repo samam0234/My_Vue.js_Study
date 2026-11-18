@@ -3,8 +3,8 @@
 > 🎯 **목표**: Vue DevTools·브라우저 도구로 문제를 추적하고, **Vitest + Vue Test Utils**로 스토어와 컴포넌트에 자동화 테스트를 추가한다.
 
 - 이전: [study8](./study8.md) 구조화
-- 구현 위치: `demo/` 17개(`src/**/__tests__/*.spec.js`), `project/` 94개(`src/**/*.spec.ts`). 실행: `npm run test:run`
-- 구현 메모: `project/` 는 `fetch` 를 직접 가짜로 바꾸는 대신 **MSW(`src/mocks/server.ts`)** 로 네트워크를 가로챕니다(study15). `demo/` 의 `auth` 스토어 테스트가 `vi.stubGlobal('fetch')` 방식입니다.
+- 구현 위치: `demo/` 17개(`src/**/__tests__/*.spec.js`), `project/final/` 94개(`src/**/*.spec.ts`). 실행: `npm run test:run`
+- 구현 메모: `project/final/` 는 `fetch` 를 직접 가짜로 바꾸는 대신 **MSW(`src/mocks/server.ts`)** 로 네트워크를 가로챕니다(study15). `demo/` 의 `auth` 스토어 테스트가 `vi.stubGlobal('fetch')` 방식입니다.
 
 ---
 
@@ -46,7 +46,7 @@ it('설명', async () => {
 | Sources 탭 + `debugger` | 중단점 걸고 한 줄씩 실행 |
 | `console.log` / `console.table` | 간단 확인. 배포 전 제거 |
 
-`project/`는 `vite-plugin-vue-devtools`가 이미 설치되어 있어 dev 서버 화면 하단 아이콘으로 DevTools를 엽니다.
+`project/final/`는 `vite-plugin-vue-devtools`가 이미 설치되어 있어 dev 서버 화면 하단 아이콘으로 DevTools를 엽니다.
 
 ---
 
@@ -55,7 +55,7 @@ it('설명', async () => {
 ### 실습 1. Vitest 설치와 설정
 
 ```bash
-cd project
+cd project/final
 npm install -D vitest @vue/test-utils jsdom
 ```
 
@@ -250,7 +250,7 @@ npm run test:run
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
-| `instanceof DOMException` 이 jsdom 에서 거짓 (취소 오류를 못 알아봄) | jsdom 과 Node(undici)의 `DOMException` 클래스가 달라 `instanceof` 가 실패 | `err.name === 'AbortError'` 로 판별 (`project/src/api/abort.ts`) |
+| `instanceof DOMException` 이 jsdom 에서 거짓 (취소 오류를 못 알아봄) | jsdom 과 Node(undici)의 `DOMException` 클래스가 달라 `instanceof` 가 실패 | `err.name === 'AbortError'` 로 판별 (`project/final/src/api/abort.ts`) |
 | `Failed to parse URL from /api/...` (테스트에서 상대 경로 fetch) | Node 의 `fetch` 는 기준 주소가 없다 | 테스트 설정 `test.env.VITE_API_BASE_URL` 에 절대 주소를 준다 |
 | `document is not defined` | `environment: 'jsdom'` 미설정 | 설정 추가, `jsdom` 설치 |
 | `describe is not defined` | `globals: true` 없음 | 설정하거나 `import { describe, it, expect } from 'vitest'` |
@@ -279,8 +279,8 @@ npm run test:run
 
 - ☑ 브라우저 Console / Network 탭으로 오류와 요청을 확인 (study6 실행 확인에서 사용)
 - ☐ Vue DevTools(Components, Pinia, Routes)로 상태를 직접 확인
-- ☑ **Vitest 설치·설정** (`environment: 'jsdom'`, `test`/`test:run` 스크립트) — Notion 체크 항목 — `demo/`, `project/` 모두 (`vitest/config` 의 `defineConfig`)
-- ☑ 스토어 테스트 2개 이상 (favorites, auth) — `project/src/stores/{auth,favorites}.spec.ts`, `demo/src/stores/__tests__/auth.spec.js`
+- ☑ **Vitest 설치·설정** (`environment: 'jsdom'`, `test`/`test:run` 스크립트) — Notion 체크 항목 — `demo/`, `project/final/` 모두 (`vitest/config` 의 `defineConfig`)
+- ☑ 스토어 테스트 2개 이상 (favorites, auth) — `project/final/src/stores/{auth,favorites}.spec.ts`, `demo/src/stores/__tests__/auth.spec.js`
 - ☑ 컴포넌트 테스트 (`PostCard`의 표시·emit) — `PostCard`·`Pagination`·`StateMessage`·`FormField`·`ErrorBoundary`
 - ☑ `fetch`를 `vi.stubGlobal`로 mock해서 성공·실패 케이스 검증 — `demo` 의 auth 스토어 테스트
 - ☐ 일부러 코드를 망가뜨려 테스트가 **실패**하는 것을 확인
