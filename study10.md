@@ -4,7 +4,7 @@
 
 - 이전: [study9](./study9.md) 테스트·디버깅
 - 다음: [studyMidpoint](./studyMidpoint.md) — study0~10만으로 게시판+로그인 완성
-- 구현 위치: `demo/`·`project/` 의 `public/_redirects`, `vercel.json`, `vite.config` 의 `base`(`BASE_PATH`)
+- 구현 위치: `demo/`·`project/final/` 의 `public/_redirects`, `vercel.json`, `vite.config` 의 `base`(`BASE_PATH`)
 
 ---
 
@@ -53,7 +53,7 @@ dist/
 ### 실습 1. 빌드와 로컬 확인
 
 ```bash
-cd project
+cd project/final
 npm run build      # dist/ 생성
 npm run preview    # dist/를 로컬 서버로 띄워 확인 (기본 http://localhost:4173)
 ```
@@ -110,7 +110,7 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 
 ### 실습 4. 정적 호스팅에 올리기 (예: Vercel / Netlify 연결)
 
-1. Git 저장소를 호스팅 서비스에 연결하고 **Root Directory**를 `project`로 지정
+1. Git 저장소를 호스팅 서비스에 연결하고 **Root Directory**를 `project/final`로 지정
 2. Build Command: `npm run build`, Output Directory: `dist`
 3. 환경 변수에 `VITE_API_BASE_URL` 등록 (빌드 때 주입)
 4. 배포 후 `/posts/1` 직접 접속과 새로고침이 되는지 확인
@@ -118,12 +118,12 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 
 ### 실습 5. 배포 전 점검표
 
-- ☑ `npm run build`가 오류 없이 끝난다 — `demo`, `project` 모두 확인
+- ☑ `npm run build`가 오류 없이 끝난다 — `demo`, `project/final` 모두 확인
 - ☑ `npm run preview`에서 모든 화면과 새로고침 동작 확인 — Playwright E2E(운영 빌드 대상) 19개로 확인
-- ☑ `console.log`, `debugger`, 테스트용 계정 채우기 버튼 제거 — `project` 는 `VITE_ENABLE_MOCK` 로 운영 번들에서 제거, `grep` 으로 `dist/` 확인
+- ☑ `console.log`, `debugger`, 테스트용 계정 채우기 버튼 제거 — `project/final` 는 `VITE_ENABLE_MOCK` 로 운영 번들에서 제거, `grep` 으로 `dist/` 확인
 - ☑ `.env.production`에 비밀키가 **없다**
 - ☑ 로그인·API 오류 시 화면이 깨지지 않는다 — 단위·통합·E2E 테스트로 확인
-- ☑ `npm run test:run` 통과 — `demo` 17개, `project` 94개
+- ☑ `npm run test:run` 통과 — `demo` 17개, `project/final` 94개
 
 ---
 
@@ -203,10 +203,10 @@ BASE_PATH=/mini-board/ npm run build      # Windows PowerShell: $env:BASE_PATH='
 
 ## ☐ 체크리스트
 
-- ☑ 기초 구간 개념(study0~7)을 `demo/`·`project/`에서 직접 실습
+- ☑ 기초 구간 개념(study0~7)을 `demo/`·`project/final/`에서 직접 실습
 - ☑ `npm run build` → `dist/` 구조 확인
 - ☑ `npm run preview`로 운영과 유사하게 확인
-- ☑ SPA fallback을 한 가지 방법(Netlify/Vercel/Nginx)으로 설정 — `demo/`·`project/` 의 `public/_redirects`, `vercel.json`, `project/nginx/`
+- ☑ SPA fallback을 한 가지 방법(Netlify/Vercel/Nginx)으로 설정 — `demo/`·`project/final/` 의 `public/_redirects`, `vercel.json`, `project/final/nginx/`
 - ☐ 정적 호스팅에 배포하고 `/posts/1` 새로고침 동작 확인
 - ☑ 배포 전 점검표 6개 항목 통과
 - ☐ 복습 문제 12개를 정답을 보지 않고 설명
