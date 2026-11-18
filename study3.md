@@ -73,7 +73,7 @@ const { email } = toRefs(form)  // ✅ ref로 변환해서 연결 유지
 
 ## 🛠️ 실기
 
-### 실습 1. `computed` — 검색 + 필터 목록 (`project/PostListView.vue`)
+### 실습 1. `computed` — 검색 + 필터 목록 (`project/final/PostListView.vue`)
 
 ```js
 const posts = ref([])
@@ -112,7 +112,7 @@ watch(keyword, (newVal, oldVal) => {
 
 ### 실습 3. 즐겨찾기를 새로고침 후에도 유지 — `watch` + `localStorage`
 
-`project/src/stores/favorites.js`는 현재 `Set`을 메모리에만 두기 때문에 새로고침하면 사라집니다. `watch` + `localStorage`로 해결하는 방법입니다.
+`project/final/src/stores/favorites.js`는 현재 `Set`을 메모리에만 두기 때문에 새로고침하면 사라집니다. `watch` + `localStorage`로 해결하는 방법입니다.
 
 ```js
 // 예시(저장소 코드에는 아직 반영하지 않음)
@@ -200,7 +200,7 @@ cd demo && npm run dev
 - ☑ `computed`로 검색+필터 파생 목록을 만들었다 (`filteredPosts`)
 - ☑ `watch`로 검색어 변경을 감시했다
 - ☑ `onMounted`로 첫 fetch를 실행했다
-- ☑ 즐겨찾기를 `watch` + `localStorage`로 새로고침 후에도 유지 (실습 3) — `demo` PropsEmitPractice(watch+localStorage), `project` favorites 스토어(VueUse `useLocalStorage`)
+- ☑ 즐겨찾기를 `watch` + `localStorage`로 새로고침 후에도 유지 (실습 3) — `demo` PropsEmitPractice(watch+localStorage), `project/final` favorites 스토어(VueUse `useLocalStorage`)
 - ☐ `watchEffect`로 같은 기능을 구현해 보고 `watch`와의 차이를 한 줄로 정리
 
 ## ➡️ 다음 단계 연결
