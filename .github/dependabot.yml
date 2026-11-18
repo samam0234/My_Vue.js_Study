@@ -2,9 +2,18 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /project
+    directory: /project/final
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /project/midpoint
+    schedule: { interval: weekly }
+  - package-ecosystem: pip
+    directory: /backend-django
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: /backend-django
+    schedule: { interval: weekly }
   - package-ecosystem: npm
     directory: /ai-proxy
     schedule: { interval: weekly }
@@ -12,7 +21,7 @@ updates:
     directory: /board-mcp
     schedule: { interval: weekly }
   - package-ecosystem: docker
-    directory: /project
+    directory: /project/final
     schedule: { interval: weekly }
   - package-ecosystem: github-actions
     directory: /

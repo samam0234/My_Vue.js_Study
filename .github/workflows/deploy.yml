@@ -20,14 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: project
+        working-directory: project/final
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: project/package-lock.json
+          cache-dependency-path: project/final/package-lock.json
       - run: npm ci
       - run: npm run ci # lint · type-check · test · build
 
@@ -53,7 +53,7 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          context: ./project
+          context: ./project/final
           push: true
           tags: |
             ${{ steps.name.outputs.image }}:${{ github.sha }}
