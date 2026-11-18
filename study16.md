@@ -3,7 +3,7 @@
 > 🎯 **목표**: 프론트엔드 보안 점검(XSS·토큰·의존성·헤더·비밀 노출)과 운영에 필요한 **전역 에러 처리·로깅·모니터링**을 갖춘다.
 
 - 이전: [study15](./study15.md) 고급 테스트·CI
-- 구현 위치: `project/src/{main.ts,utils/report.ts,utils/safeUrl.ts,components/ErrorBoundary.vue}`, `project/nginx/security-headers.conf`, `.github/dependabot.yml`
+- 구현 위치: `project/final/src/{main.ts,utils/report.ts,utils/safeUrl.ts,components/ErrorBoundary.vue}`, `project/final/nginx/security-headers.conf`, `.github/dependabot.yml`
 - 점검 결과는 [studyFinal.md](./studyFinal.md) §3.2 에 기록했습니다. 모니터링은 Sentry 대신 의존성 없는 `sendBeacon` 보고(`VITE_ERROR_REPORT_URL`)로 구현했고, `reportError` 한 곳만 바꾸면 Sentry 로 교체됩니다.
 
 ---
@@ -114,7 +114,7 @@ git ls-files | xargs grep -nE "(api[_-]?key|secret|password)\s*[:=]\s*['\"][^'\"
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /project
+    directory: /project/final
     schedule: { interval: weekly }
 ```
 
@@ -299,7 +299,7 @@ if (import.meta.env.PROD) {
 - ☑ 필요 시 DOMPurify로 정화하거나 `safeHref`로 URL 검증 — `utils/safeUrl.ts` (단위 테스트 포함). 사용자 입력 HTML 을 렌더링하는 곳이 없어 DOMPurify 는 미도입
 - ☑ `npm audit --omit=dev` 확인, Dependabot 설정 — `.github/dependabot.yml`. 현재 high 8건은 모두 picomatch ReDoS 하나에서 파생되며 패치 버전이 아직 없다 → CI 는 critical 만 차단
 - ☑ `VITE_`/`.env`에 비밀이 없고 번들에도 없음을 확인 — `grep` 으로 운영 `dist/` 에 개발용 계정·목 토큰 문자열이 없음을 확인
-- ☐ 보안 헤더(CSP, nosniff, frame-ancestors, Referrer-Policy)를 설정하고 `curl -I`로 확인 — `project/nginx/security-headers.conf` 작성 완료. Docker 를 띄워 `curl -I` 로 확인하는 것은 아직 하지 않았다
+- ☐ 보안 헤더(CSP, nosniff, frame-ancestors, Referrer-Policy)를 설정하고 `curl -I`로 확인 — `project/final/nginx/security-headers.conf` 작성 완료. Docker 를 띄워 `curl -I` 로 확인하는 것은 아직 하지 않았다
 - ☑ `errorHandler` + `unhandledrejection` + `ErrorBoundary`로 오류가 화면을 죽이지 않게 함 — `main.ts`, `ErrorBoundary.vue` (단위 테스트)
 - ☑ `reportError` 한 곳으로 모으고 `requestId`를 화면/로그에 노출 — `utils/report.ts`, `StateMessage`/`ErrorBoundary` 에 `requestId` 표시
 - ☑ 모니터링(Sentry 등) 연동 또는 대체 수단 선택 + 민감정보 제거 — `sendBeacon` 대체 수단 (토큰·쿼리스트링 미전송)
