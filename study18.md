@@ -3,7 +3,7 @@
 > 🎯 **목표**: Vue 앱에 AI 모델 API를 **안전하게**(키를 브라우저에 두지 않고) 연동해 게시글 요약·스트리밍 응답을 만들고, MCP(Model Context Protocol)의 기초를 익혀 게시판 API를 AI 도구에 연결해 본다.
 
 - 이전: [study17](./study17.md) Docker·배포 자동화
-- 구현 위치: [`ai-proxy/`](./ai-proxy)(Express 프록시, 테스트 7개), [`board-mcp/`](./board-mcp)(읽기 전용 MCP 서버, 스모크 테스트 3개), [`.mcp.json`](./.mcp.json), `project/src/{api/ai.ts, composables/useStreamSummary.ts, components/AiSummary.vue}`
+- 구현 위치: [`ai-proxy/`](./ai-proxy)(Express 프록시, 테스트 7개), [`board-mcp/`](./board-mcp)(읽기 전용 MCP 서버, 스모크 테스트 3개), [`.mcp.json`](./.mcp.json), `project/final/src/{api/ai.ts, composables/useStreamSummary.ts, components/AiSummary.vue}`
 - 구현 메모: 프록시는 토큰 확인을 "헤더가 있는가"가 아니라 **백엔드 `/api/auth/me` 로 실제 검증**하고, 사용자별 분당 호출 제한(429)을 둡니다. 실제 AI API 를 호출하는 테스트는 하지 않았습니다(Anthropic 클라이언트는 가짜로 대체) — 키를 넣고 직접 확인하세요. 개발 중 Vue 는 같은 스펙의 **MSW 목 스트림**으로 동작합니다.
 - API 키는 직접 발급·보관해야 하며, SDK 사용법은 버전에 따라 달라질 수 있으니 공식 문서를 함께 확인하세요.
 
