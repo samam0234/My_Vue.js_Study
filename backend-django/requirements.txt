@@ -1,0 +1,4 @@
+Django>=5.2,<5.3
+gunicorn>=23
+# MySQL 을 쓸 때만 (DB_ENGINE=mysql):
+# mysqlclient>=2.2
