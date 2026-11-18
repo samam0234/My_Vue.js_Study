@@ -3,7 +3,7 @@
 > 🎯 **목표**: `v-model`로 사용자 입력을 받고, 클라이언트 유효성 검사와 오류 표시를 만든 뒤, 서버가 돌려준 검증 오류도 같은 자리에 표시한다.
 
 - 이전: [study4](./study4.md) 라우팅
-- 대응 코드: [`demo/src/components/FormValidationPractice.vue`](./demo/src/components/FormValidationPractice.vue), [`LoginFormPractice.vue`](./demo/src/components/LoginFormPractice.vue), [`project/src/views/LoginView.vue`](./project/src/views/LoginView.vue)
+- 대응 코드: [`demo/src/components/FormValidationPractice.vue`](./demo/src/components/FormValidationPractice.vue), [`LoginFormPractice.vue`](./demo/src/components/LoginFormPractice.vue), [`project/final/src/views/LoginView.vue`](./project/final/src/views/LoginView.vue)
 
 ---
 
@@ -174,7 +174,7 @@ function fieldError(field) {
 ### 실행 확인
 
 ```bash
-cd project && npm run dev     # /login
+cd project/final && npm run dev     # /login
 ```
 
 1. 아무것도 입력하지 않고 로그인 버튼 → 두 필드의 오류가 모두 뜨는가
@@ -206,9 +206,9 @@ cd project && npm run dev     # /login
 - ☑ `touched`/`submitted`로 오류 노출 시점 제어
 - ☑ `@submit.prevent`, `novalidate`, 중복 제출 방지(`:disabled`)
 - ☑ 로그인 폼(`LoginView.vue`)에 적용
-- ☑ 회원가입 폼 추가 + 비밀번호 확인 일치 검사 — `project/src/views/SignupView.vue`
+- ☑ 회원가입 폼 추가 + 비밀번호 확인 일치 검사 — `project/final/src/views/SignupView.vue`
 - ☑ 서버 `error.fields`를 필드 아래에 표시 (실습 4, study6의 API 클라이언트 필요) — `SignupView`, `PostFormView` (MSW 목 서버로 검증)
-- ☑ 게시글 작성 폼(제목 1~200자, 본문 필수) 검증 — [study6](./study6.md)의 작성·수정 화면에서 사용 — `project/src/views/PostFormView.vue`
+- ☑ 게시글 작성 폼(제목 1~200자, 본문 필수) 검증 — [study6](./study6.md)의 작성·수정 화면에서 사용 — `project/final/src/views/PostFormView.vue`
 
 ## ➡️ 다음 단계 연결
 
