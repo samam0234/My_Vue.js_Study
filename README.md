@@ -3,7 +3,7 @@
 Vue 3 + Vite로 **환경 설정 → 기초 문법 → 미니 서비스 → 운영 수준 심화**까지 단계별로 정리한 학습 기록입니다. 이 저장소는 **Vue 하나만** 다룹니다.
 
 - 대상: HTML/CSS/JS는 알고, 이미 만든 화면을 **컴포넌트·상태·라우팅**으로 조직하는 첫 프레임워크를 배우려는 사람
-- 실습 코드: [`demo/`](./demo)(개념별 연습장), [`project/`](./project)(미니 게시판)
+- 실습 코드: [`demo/`](./demo)(개념별 연습장), [`project/final/`](./project/final)(미니 게시판)
 - 모든 학습 문서의 구성: `🎯 목표 한 줄 → 📖 이론 → 🛠️ 실기(코드·줄별 설명) → ⚠️ 오류 노트 → ☐ 체크리스트 → ➡️ 다음 단계 연결`
 
 ## 학습 순서
@@ -61,11 +61,11 @@ vue.js/
 ├─ study11.md ~ study18.md    # 후반 심화 구간
 ├─ studyFinal.md              # 심화 응용 (실측 기록표 포함)
 ├─ demo/                      # study0~10 개념별 실습 연습장 (JS, Vue 3 + Vite, Vitest)
-├─ project/                   # Mini Board — midpoint + final 구현 (TypeScript, Tailwind, Vitest, Playwright, Docker)
-│  ├─ src/{api,mocks,stores,composables,components,views,router,utils,config,types,test}
-│  ├─ e2e/                    # Playwright E2E
-│  ├─ nginx/ · Dockerfile     # 운영 이미지 (Nginx)
-│  └─ mock-public/            # MSW 워커 스크립트 (개발·E2E 빌드에서만 제공)
+├─ project/
+│  ├─ midpoint/               # studyMidpoint — study0~10 범위(JS)로 만든 게시판+로그인, 개발 API 서버(`npm run api`) 포함
+│  └─ final/                  # studyFinal — midpoint 를 TypeScript·Tailwind·캐시·E2E·Docker 로 확장
+│     (final: src/{api,mocks,...}, e2e/ Playwright, nginx/·Dockerfile 운영 이미지, mock-public/ MSW 워커)
+├─ backend-django/            # Django 로 구현한 공통 API 스펙 v1 백엔드 (SQLite/MySQL, 테스트 23개)
 ├─ ai-proxy/                  # AI 프록시 (키 보관·로그인 확인·SSE 중계), 테스트 포함
 ├─ board-mcp/                 # 게시판 읽기 전용 MCP 서버, 테스트 포함
 ├─ docker-compose.yml         # web(Nginx) + backend + ai-proxy
@@ -85,13 +85,22 @@ npm install
 npm run dev          # http://localhost:5173
 npm run test:run     # Vitest
 
-# Mini Board (midpoint + final)
-cd project
+# midpoint (study0~10 범위): 개발 API 서버 + 프론트
+cd project/midpoint
 npm install
-npm run dev          # 백엔드 없이 MSW 목 서버로 동작 (계정: mina@example.com / password123)
+npm run api          # 터미널 1: http://localhost:8000
+npm run dev          # 터미널 2
+
+# 실제 백엔드(Django)에 연결: cd backend-django && pip install -r requirements.txt && python manage.py migrate && python manage.py seed && python manage.py runserver 8000
+#   → midpoint 는 `npm run api` 대신 이 서버를 8000번에 띄우면 그대로 붙는다
+
+# final (심화): 백엔드 없이 MSW 목 서버로 동작 (계정: mina@example.com / password123)
+cd ../final
+npm install
+npm run dev
 ```
 
-### project/ 명령
+### project/final/ 명령
 
 | 명령 | 설명 |
 |---|---|
@@ -104,7 +113,7 @@ npm run dev          # 백엔드 없이 MSW 목 서버로 동작 (계정: mina@e
 | `npm run ci` | lint → type-check → test → build |
 | `npm run build:analyze` | 번들 분석 `dist/stats.html` |
 
-실제 백엔드(공통 API 스펙 v1)에 붙이려면 `project/.env.development.local` 에 `VITE_ENABLE_MOCK=false` 를 두면 Vite 프록시가 `/api` 를 `localhost:8000` 으로 보냅니다(AI 는 `/api/ai` → `localhost:8787`).
+실제 백엔드(공통 API 스펙 v1)에 붙이려면 `project/final/.env.development.local` 에 `VITE_ENABLE_MOCK=false` 를 두면 Vite 프록시가 `/api` 를 `localhost:8000` 으로 보냅니다(AI 는 `/api/ai` → `localhost:8787`).
 
 ```bash
 # AI 프록시 / MCP 서버 (각각 npm install 후)
@@ -118,15 +127,16 @@ cd board-mcp && npm test
 
 | 범위 | 상태 |
 |---|---|
-| study0~7 | `demo/` 개념별 실습 + `project/` 구현 완료 |
-| study8~10 | `demo/`(환경변수·composable·Vitest·SPA fallback), `project/` 구현 완료 |
-| studyMidpoint | `project/` 의 기능 F1~F9 구현, 테스트 통과 |
-| study11~16, 18 | `project/`, `ai-proxy/`, `board-mcp/` 구현·테스트 통과 (실제 AI API 호출만 미검증) |
-| study17 | `Dockerfile`·`nginx/`·`docker-compose.yml`·`deploy.yml` **작성 완료, 아직 실행하지 않음**(Docker 데몬·GitHub Actions 첫 실행 전) |
+| study0~7 | `demo/` 개념별 실습 + `project/final/` 구현 완료 |
+| study8~10 | `demo/`(환경변수·composable·Vitest·SPA fallback), `project/final/` 구현 완료 |
+| studyMidpoint | `project/midpoint/` — 기능 F1~F9 구현, 테스트 42개 통과 (개발 API 서버 포함) |
+| study11~16, 18 | `project/final/`, `ai-proxy/`, `board-mcp/` 구현·테스트 통과 (실제 AI API 호출만 미검증) |
+| study17 | `docker build`·`run`(73.9MB), **`docker compose up` 전체 스택(web + Django + ai-proxy)** 실행·검증 완료. `deploy.yml`(GitHub Actions)만 **아직 실행하지 않음** |
+| study6~7 Django 연동 | `backend-django/` 구현·테스트 23개, midpoint 를 Vite 프록시·CORS 두 방식으로 브라우저 검증 (MySQL 서버로는 미실행) |
 | studyFinal | 실측 기록표 작성. Lighthouse·컨테이너 실행·실제 배포는 미측정/미실행 |
 
 - 문서의 `☑` 는 코드로 구현하고 확인한 항목, `☐` 는 아직 하지 않았거나 학습자가 직접 해 보는 항목(설명하기, 수동 확인, 실제 배포 등)입니다.
-- 백엔드가 없어서 API 는 **MSW 목 서버**(`project/src/mocks/`)가 대신하고, 단위·통합·E2E 가 같은 핸들러를 공유합니다. 백엔드 연동은 **「공통 API 스펙 v1」**(`/api/posts`, `/api/auth/*`, `{ data }` / `{ error }` 응답 형식)을 따르는 서버를 전제로 합니다.
+- 백엔드가 없어서 API 는 **MSW 목 서버**(`project/final/src/mocks/`)가 대신하고, 단위·통합·E2E 가 같은 핸들러를 공유합니다. 백엔드 연동은 **「공통 API 스펙 v1」**(`/api/posts`, `/api/auth/*`, `{ data }` / `{ error }` 응답 형식)을 따르는 서버를 전제로 합니다.
 
 ## 기존 문서 → 새 문서 매핑
 
