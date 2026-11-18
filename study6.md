@@ -3,8 +3,9 @@
 > 🎯 **목표**: 프론트(Vue)는 DB에 직접 접근하지 않고 **HTTP API**로 CRUD 한다는 구조를 이해하고, `fetch` 클라이언트를 만들어 공개 API → 실제 백엔드 API 순서로 게시판 CRUD와 작성·수정 화면을 만든다.
 
 - 이전: [study5](./study5.md) 폼 검증
-- 대응 코드: [`demo/src/components/FetchApiPractice.vue`](./demo/src/components/FetchApiPractice.vue)(JSONPlaceholder), [`project/src/api/`](./project/src/api)(`client.ts`·`posts.ts`·`comments.ts`·`auth.ts`), [`project/src/views/PostFormView.vue`](./project/src/views/PostFormView.vue)
-- 구현 메모: `project/` 는 [study14](./study14.md) 이후 TypeScript(`.ts`)라 아래 JS 예시와 확장자·타입만 다릅니다. 백엔드가 없는 동안은 **MSW 목 서버**(`project/src/mocks/`)가 공통 API 스펙 v1 을 흉내 냅니다(`npm run dev` 기본값).
+- 대응 코드: [`demo/src/components/FetchApiPractice.vue`](./demo/src/components/FetchApiPractice.vue)(JSONPlaceholder), [`project/final/src/api/`](./project/final/src/api)(`client.ts`·`posts.ts`·`comments.ts`·`auth.ts`), [`project/final/src/views/PostFormView.vue`](./project/final/src/views/PostFormView.vue)
+- 백엔드: [`backend-django/`](./backend-django) — Django 로 구현한 공통 API 스펙 v1 서버. 프론트는 이 서버와 개발용 `api-server.js` 어느 쪽에도 코드 수정 없이 붙습니다.
+- 구현 메모: `project/final/` 는 [study14](./study14.md) 이후 TypeScript(`.ts`)라 아래 JS 예시와 확장자·타입만 다릅니다. 백엔드가 없는 동안은 **MSW 목 서버**(`project/final/src/mocks/`)가 공통 API 스펙 v1 을 흉내 냅니다(`npm run dev` 기본값).
 
 ---
 
@@ -288,7 +289,7 @@ async function submit() {
 ```bash
 # 터미널 1: 백엔드 (공통 API 스펙 v1을 구현한 서버. 예: http://localhost:8000)
 # 터미널 2:
-cd project && npm run dev
+cd project/final && npm run dev
 ```
 
 1. 서버가 꺼진 상태에서 목록 → "서버에 연결할 수 없습니다" 오류 + 다시 시도 버튼
@@ -320,8 +321,8 @@ cd project && npm run dev
 - ☑ `fetch`로 GET 요청, `res.ok` 확인, loading/error/success 3종 상태 관리 (JSONPlaceholder)
 - ☑ `Promise.all`로 상세·댓글 병렬 요청 ([study4](./study4.md))
 - ☑ 오류 시 "다시 시도" 버튼 제공
-- ☑ `src/api/client.js`(오류 구조화) + `src/api/posts.js` 작성 — `project/src/api/client.ts`, `posts.ts`
-- ☐ **대표 조합 2번(Vue + Django + MySQL)의 Django API에 게시판 연결 — CORS 또는 Vite 프록시** — Vite 프록시(`/api` → `localhost:8000`)와 `.env` 설정은 끝났다. 실제 Django 서버가 생기면 `.env.development.local` 에 `VITE_ENABLE_MOCK=false` 를 두고 연결해 확인한다.
+- ☑ `src/api/client.js`(오류 구조화) + `src/api/posts.js` 작성 — `project/final/src/api/client.ts`, `posts.ts`
+- ☑ **대표 조합 2번(Vue + Django + MySQL)의 Django API에 게시판 연결 — CORS 또는 Vite 프록시** — [`backend-django/`](./backend-django)(Django, 스펙 v1, 테스트 23개)에 `project/midpoint` 를 **Vite 프록시**와 **CORS 직접 호출** 두 방식으로 연결해 브라우저에서 로그인·작성·수정·삭제·댓글·404·409 흐름을 확인했다(각 13개 시나리오 통과). DB 는 SQLite 로 검증했고 MySQL 은 `DB_ENGINE=mysql` 설정만 준비했다(MySQL 서버로는 실행하지 않음).
 - ☑ 목록의 검색(`q`)·페이지(`page`/`meta.totalPages`) 연결 — `PostListView` (디바운스·URL 동기화·취소 포함)
 - ☑ **작성·수정 화면** (`PostFormView.vue`, 서버 `error.fields` 표시) — Notion 체크 항목 — `PostFormView.vue`
 - ☑ 삭제 (204 처리 + 화면 갱신) — `PostDetailView.vue`
