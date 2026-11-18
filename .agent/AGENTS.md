@@ -10,7 +10,8 @@
 - 각 문서 공통 구성: 목표 한 줄 → 이론 → 실기(코드·줄별 설명) → 오류 노트 → ☐ 체크리스트 → 다음 단계 연결. (`☑` = 코드로 구현 완료, `☐` = 미완료)
 - 문서 상단의 "구현 위치"가 해당 문서의 실제 코드 위치입니다. 코드를 구현·검증하면 문서의 체크리스트를 `☑`로 갱신하고, 실행하지 못한 항목(Docker 빌드, 실제 배포 등)은 `☐`로 두고 이유를 적습니다.
 - `demo/`: study0~study10 범위를 개념별로 하나씩 실습하는 Vue 3 + Vite(JS) 프로젝트입니다. 실습 컴포넌트들이 홈 화면 한 페이지에 계속 누적되는 구조입니다.
-- `project/`: `studyMidpoint.md`·`studyFinal.md`를 구현한 Mini Board(TypeScript, Tailwind, Vitest, Playwright, Docker). `studyFinal.md`의 JSONPlaceholder 버전에서 출발해 공통 API 스펙 v1 기반으로 재구성했습니다. 백엔드가 없어 MSW 목 서버로 개발·테스트합니다.
+- `project/midpoint/`: `studyMidpoint.md` 구현(study0~10 범위, JS, 개발 API 서버 `npm run api`). `project/final/`: `studyFinal.md` 구현(midpoint 를 TypeScript, Tailwind, Vitest, Playwright, Docker 로 확장). 공통 API 스펙 v1 기반이며, midpoint 는 개발 API 서버, final 은 MSW 목 서버로 개발·테스트합니다.
+- `backend-django/`: Django 로 구현한 공통 API 스펙 v1 서버(`python manage.py test`).
 - `ai-proxy/`, `board-mcp/`: study18의 AI 프록시와 MCP 서버(각자 `package.json`, `npm test`).
 - 주의: `vite.config.js`와 `vite.config.ts`가 함께 있으면 `.js`가 먼저 읽혀 `.ts` 설정이 무시됩니다. 하나만 둡니다.
 - `studyMidpoint.md`·`studyFinal.md`: 중간·심화 응용 문서입니다. (옛 JSONPlaceholder 종합 실습 기록은 git 이력 `f0fdea4`의 `studyFinal.md`)
