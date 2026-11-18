@@ -3,8 +3,9 @@
 > 🎯 **목표**: Pinia로 로그인 상태를 공유하고, 가상 로그인을 **실제 로그인(`accessToken`)** 으로 바꾸며, 새로고침 후 유지·라우트 가드·401/403 처리를 구현한다.
 
 - 이전: [study6](./study6.md) DB·API 연동
-- 대응 코드: [`demo/src/stores/auth.js`](./demo/src/stores/auth.js)(가상 로그인), [`project/src/stores/auth.ts`](./project/src/stores/auth.ts)(실제 로그인·토큰), [`project/src/router/index.ts`](./project/src/router/index.ts)(가드), [`project/src/api/client.ts`](./project/src/api/client.ts)(401 처리)
-- 구현 메모: `project/` 는 TypeScript 이고, 스토어↔라우터 순환 import 를 피하려고 `authed()` 대신 `configureApi({ getToken, onUnauthorized })` 훅을 `main.ts` 에서 주입합니다.
+- 대응 코드: [`demo/src/stores/auth.js`](./demo/src/stores/auth.js)(가상 로그인), [`project/final/src/stores/auth.ts`](./project/final/src/stores/auth.ts)(실제 로그인·토큰), [`project/final/src/router/index.ts`](./project/final/src/router/index.ts)(가드), [`project/final/src/api/client.ts`](./project/final/src/api/client.ts)(401 처리)
+- 서버 쪽 구현: [`backend-django/`](./backend-django) (`django.core.signing` 서명 토큰·만료·비밀번호 해시·`INVALID_CREDENTIALS`·403 작성자 검사, 테스트 23개)
+- 구현 메모: `project/final/` 는 TypeScript 이고, 스토어↔라우터 순환 import 를 피하려고 `authed()` 대신 `configureApi({ getToken, onUnauthorized })` 훅을 `main.ts` 에서 주입합니다.
 
 ---
 
@@ -61,7 +62,7 @@ Setup Store 규칙: `ref` → state, `computed` → getter, 함수 → action. �
 
 ### 실습 1. 현재 상태 — 가상 로그인 (참고)
 
-`project/src/stores/auth.js`는 JSONPlaceholder 사용자 목록에서 이메일이 일치하면 성공 처리하는 **목업**입니다. 비밀번호는 길이만 확인합니다. 이를 아래처럼 실제 서버 로그인으로 교체합니다.
+`project/final/src/stores/auth.js`는 JSONPlaceholder 사용자 목록에서 이메일이 일치하면 성공 처리하는 **목업**입니다. 비밀번호는 길이만 확인합니다. 이를 아래처럼 실제 서버 로그인으로 교체합니다.
 
 ### 실습 2. 실제 로그인 스토어 — `stores/auth.js` (토큰 + 새로고침 유지)
 
