@@ -3,8 +3,8 @@
 > 🎯 **목표**: 폴더 구조를 역할별로 정리하고, 반복되는 로직을 composable로 뽑아내며, 설정값을 `.env` 환경변수로 분리한다.
 
 - 이전: [study7](./study7.md) 인증
-- 구현 위치: [`demo/src/config`](./demo/src/config)·[`composables`](./demo/src/composables)·[`utils`](./demo/src/utils)(JS), [`project/src/`](./project/src) 의 `config/`·`api/`·`composables/`·`utils/`(TS)
-- 환경변수 파일: `demo/.env*`, `project/.env.example`·`.env.development`·`.env.production`(`.env.local` 은 `*.local` 로 git 제외)
+- 구현 위치: [`demo/src/config`](./demo/src/config)·[`composables`](./demo/src/composables)·[`utils`](./demo/src/utils)(JS), [`project/final/src/`](./project/final/src) 의 `config/`·`api/`·`composables/`·`utils/`(TS)
+- 환경변수 파일: `demo/.env*`, `project/final/.env.example`·`.env.development`·`.env.production`(`.env.local` 은 `*.local` 로 git 제외)
 
 ---
 
@@ -50,7 +50,7 @@
 ### 실습 1. 목표 폴더 구조
 
 ```
-project/
+project/final/
 ├─ .env.example
 ├─ .env.development
 ├─ src/
@@ -247,9 +247,9 @@ document.title = env.appTitle
 ## ☐ 체크리스트
 
 - ☑ `views` / `components` / `stores` / `router` 폴더를 역할별로 분리 (현재 구조)
-- ☑ `api/`, `composables/`, `config/`, `utils/` 폴더 추가 — `project/src` 에 모두 구성, `demo` 는 `config/`·`composables/`·`utils/`
-- ☑ `.env.example`, `.env.development`, `.env.production` 작성, `.env.local`은 git 제외 — `demo/`, `project/` 둘 다
-- ☑ `config/env.js` 하나에서만 `import.meta.env` 읽기 — `config/env.js`(demo) · `config/env.ts`(project). 예외: 빌드 시 정적 제거가 필요한 `main.ts`·`LoginView` 의 `VITE_ENABLE_MOCK` 두 곳
+- ☑ `api/`, `composables/`, `config/`, `utils/` 폴더 추가 — `project/final/src` 에 모두 구성, `demo` 는 `config/`·`composables/`·`utils/`
+- ☑ `.env.example`, `.env.development`, `.env.production` 작성, `.env.local`은 git 제외 — `demo/`, `project/final/` 둘 다
+- ☑ `config/env.js` 하나에서만 `import.meta.env` 읽기 — `config/env.js`(demo) · `config/env.ts`(project/final). 예외: 빌드 시 정적 제거가 필요한 `main.ts`·`LoginView` 의 `VITE_ENABLE_MOCK` 두 곳
 - ☑ `useAsync` composable로 loading/error/data 중복 제거 — `composables/useAsync`
 - ☑ `useDebouncedRef`로 검색 요청 횟수 줄이기 (Network 탭에서 비교) — `composables/useDebounce` (단위 테스트로 검증)
 - ☐ `VITE_` 변수에 **비밀키를 넣으면 안 되는 이유**를 설명할 수 있다
